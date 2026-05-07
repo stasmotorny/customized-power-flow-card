@@ -146,7 +146,7 @@ export function OverviewPage() {
         </div>
       </Section>
 
-      <Section title="Source &amp; releases">
+      <Section title="Source & releases">
         <Prose>
           <p>
             The card is distributed via{" "}
@@ -969,7 +969,7 @@ entities:
         />
       </Section>
 
-      <Section id="full-config" title="Mix &amp; match (full config)">
+      <Section id="full-config" title="Mix & match (full config)">
         <Prose>
           <p>
             Demonstrates many of the available options at once. You don't need most of these — this

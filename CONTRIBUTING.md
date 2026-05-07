@@ -17,7 +17,7 @@ Each card is located in its own folder inside [`packages/flixlix-cards`](package
 
 - `power-flow-card-plus`
 - `energy-flow-card-plus`
-- _(more to come!)_
+- `energy-breakdown-card`
 
 Each package contains its source code, changelogs, and relevant scripts.
 

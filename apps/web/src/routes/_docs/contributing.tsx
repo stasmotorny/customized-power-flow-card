@@ -134,10 +134,11 @@ function ContributingPage() {
 ├─ packages/
 │  ├─ flixlix-cards/
 │  │  ├─ power-flow-card-plus/
-│  │  └─ energy-flow-card-plus/
+│  │  ├─ energy-flow-card-plus/
 │  │  └─ energy-breakdown-card/
 │  ├─ shared/                   # shared utilities & i18n
 │  ├─ ui/                       # shadcn-style UI primitives
+│  ├─ utils/                    # tiny helpers (cn)
 │  └─ tooling/                  # eslint, prettier, tsconfig presets
 ├─ pnpm-workspace.yaml
 └─ turbo.json`}
@@ -347,8 +348,7 @@ git push -u origin feat/grid-color-toggle`}
           </Button>
         </div>
       </Section>
-
-      <NextPageNav prev={{ label: "Examples", to: "/energy-flow-card-plus/examples" }} />
+      <NextPageNav prev={{ label: "Examples", to: "/energy-breakdown-card/examples" }} />
     </>
   );
 }

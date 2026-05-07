@@ -247,7 +247,7 @@ export function OverviewPage({ cardKey }: { cardKey: CardKey }) {
         </div>
       </Section>
 
-      <Section title="Source &amp; releases">
+      <Section title="Source & releases">
         <Prose>
           <p>
             The card is published as <code>{v.pkgName}</code> via HACS and on GitHub. Issues and
@@ -1650,7 +1650,7 @@ kilo_threshold: 10000`}
         />
       </Section>
 
-      <Section id="full-config" title="Mix &amp; match (full config)">
+      <Section id="full-config" title="Mix & match (full config)">
         <Prose>
           <p>
             Demonstrates many of the available options at once. You don't need most of these, this
@@ -1679,7 +1679,7 @@ entities:
       consumption: sensor.grid_consumption
   solar:
     icon: mdi:solar-panel-large
-    entity: sensor.solar_production
+    entity: sensor.solar_${sensorSuffix === "energy" ? "energy" : "production"}
   battery:
     name: Bateria
     icon: mdi:battery-high

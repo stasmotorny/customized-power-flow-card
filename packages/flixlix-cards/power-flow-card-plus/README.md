@@ -36,10 +36,10 @@
 - Option for card full size
 - Add Grid Tolerance for small values, to not display the battery correcting grid values
 - New and improved Flow Rate Model
-- Choose wether or not to color icons, text, etc.
+- Choose whether or not to color icons, text, etc.
 - Display Individual power entities
-- Customize Individual entities's label, icon and color
-- Configure wether to hide Individual Entity when state is 0 or unavailable
+- Customize Individual entities' label, icon and color
+- Configure whether to hide Individual Entity when state is 0 or unavailable
 - Clickable entities (including home)
 - Fixed crooked lines
 - Have curved lines connect to the Circles
@@ -110,7 +110,7 @@ Else, if you prefer the graphical editor, use the menu to add the resource:
 > The reference below is kept for offline reading. The **canonical, easier-to-navigate version is at [cards.flixlix.com/power-flow-card-plus/configuration](https://cards.flixlix.com/power-flow-card-plus/configuration)** — with grouped options, an interactive configurator, and copy-pasteable examples.
 
 > [!WARNING]  
-> This card offers a **LOT** of configuration options. Don't worry, if you want your card's appearance to match the oficial Energy Flow Card, you will only need to setup the entities. The rest of the options only enable further customization. If this is your goal, please go to [Minimal Configuration](#minimal-configuration) or the [Examples page](https://cards.flixlix.com/power-flow-card-plus/examples) on the docs site.
+> This card offers a **LOT** of configuration options. Don't worry, if you want your card's appearance to match the official Energy Flow Card, you will only need to setup the entities. The rest of the options only enable further customization. If this is your goal, please go to [Minimal Configuration](#minimal-configuration) or the [Examples page](https://cards.flixlix.com/power-flow-card-plus/examples) on the docs site.
 
 ### Options
 
@@ -249,7 +249,7 @@ The Individual fields must be an array of objects. Each object must follow the f
 | color_value         | `boolean` or "solar" or "grid" or "battery" | `false`              | If set to `true`, state text color will match the highest value. If set to `solar`, state text color will match the color of solar. If set to `grid`, state text color will match the color of the grid consumption. If set to `battery`, state text color will match the color of the battery consumption. |
 | secondary_info      | `object`                                    | `undefined`          | Check [Secondary Info Object](#secondary-info-configuration)                                                                                                                                                                                                                                                |
 | subtract_individual | `boolean`                                   | false                | If set to `true`, the home consumption will be calculated by subtracting the sum of the individual devices from the home consumption.                                                                                                                                                                       |
-| override_state      | `boolean`                                   | `false`              | If set to `true`, the home consumption will be the state of the entity provided. By default the home consumption is caluclated by adding up all sources. This is useful, when for example you are using an inverter and it has power losses.                                                                |
+| override_state      | `boolean`                                   | `false`              | If set to `true`, the home consumption will be the state of the entity provided. By default the home consumption is calculated by adding up all sources. This is useful, when for example you are using an inverter and it has power losses.                                                                |
 
 #### Fossil Fuel Configuration
 
