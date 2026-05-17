@@ -368,8 +368,10 @@ describe("flowElement", () => {
     expect(cssText).toContain("position: relative");
     expect(cssText).toContain("height: 340px");
     expect(cssText).toContain(".custom-topology-node");
-    expect(cssText).toContain("left: calc(var(--custom-topology-x) * 1%)");
-    expect(cssText).toContain("top: calc(var(--custom-topology-y) * 1px)");
+    expect(cssText).not.toContain("left: calc(var(--custom-topology-x) * 1%)");
+    expect(cssText).not.toContain("top: calc(var(--custom-topology-y) * 1px)");
+    expect(cssText).not.toContain("--custom-topology-x");
+    expect(cssText).not.toContain("--custom-topology-y");
     expect(cssText).toContain("transform: translate(-50%, -40px)");
     expect(cssText).toContain(".custom-topology-node-rightTopIndividual");
     expect(cssText).toContain("transform: translate(-50%, -60px)");

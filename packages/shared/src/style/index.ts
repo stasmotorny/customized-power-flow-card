@@ -171,8 +171,6 @@ export const styles = css`
 
   .custom-topology-node {
     position: absolute;
-    left: calc(var(--custom-topology-x) * 1%);
-    top: calc(var(--custom-topology-y) * 1px);
     transform: translate(-50%, -40px);
     z-index: 1;
   }

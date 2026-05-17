@@ -130,9 +130,15 @@ describe("render", () => {
     } as PowerFlowCardPlusConfig);
     expect(markup).toContain('class="custom-topology-stage"');
     expect(markup).toContain('class="custom-topology-node custom-topology-node-grid"');
+    expect(markup).toContain('style="left: 12.5%; top: 170px;"');
     expect(markup).toContain('class="custom-topology-node custom-topology-node-breaker"');
+    expect(markup).toContain('style="left: 37.5%; top: 170px;"');
     expect(markup).toContain('class="custom-topology-node custom-topology-node-inverter"');
     expect(markup).toContain('class="custom-topology-node custom-topology-node-home"');
+    expect(markup).toContain('style="left: 87.5%; top: 170px;"');
+    expect(markup).not.toContain("--custom-topology-x");
+    expect(markup).not.toContain("--custom-topology-y");
+    expect(markup).not.toContain("calc(var(--custom-topology");
     expect(markup).not.toContain('class="row custom-topology-layout"');
     expect(markup).not.toContain('class="row standard-layout"');
     expect(markup).toContain('id="grid-icon"');
