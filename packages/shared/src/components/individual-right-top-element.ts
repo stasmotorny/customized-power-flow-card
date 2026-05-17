@@ -11,6 +11,11 @@ import { checkHasBottomIndividual } from "@flixlix-cards/shared/utils/compute-in
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./flows/custom-topology-geometry";
 import { spacer } from "./spacer";
 import { individualSecondarySpan } from "./spans/individual-secondary-span";
 
@@ -102,32 +107,39 @@ export const individualRightTopElement = (
     ${showLine(config, individualObj.state || 0) && !config.entities.home?.hide
       ? customTopologyHas
         ? html`
-            <svg width="80" height="30">
-              <path
-                id="individual-top-right-home"
-                class="${styleLine(individualObj.state || 0, config)}"
-                d="M40 -10 v50"
-                vector-effect="non-scaling-stroke"
-              />
-              ${checkShouldShowDots(config) &&
-              individualObj.state &&
-              individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
-                ? svg`<circle r="1.75" class="individual-top" vector-effect="non-scaling-stroke">
-                      <animateMotion
-                        dur="${computeIndividualFlowRate(
-                          individualObj?.field?.calculate_flow_rate,
-                          duration
-                        )}s"
-                        repeatCount="indefinite"
-                        calcMode="paced"
-                        keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
-                        keyTimes="0;1"
-                      >
-                        <mpath xlink:href="#individual-top-right-home" />
-                      </animateMotion>
-                    </circle>`
-                : nothing}
-            </svg>
+            <div class="lines custom-topology-lines individual-right-top-flow">
+              <svg
+                viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+                id="individual-right-top-home-flow"
+              >
+                <path
+                  id="individual-top-right-home"
+                  class="${styleLine(individualObj.state || 0, config)}"
+                  d=${`M${CUSTOM_TOPOLOGY_X.home},${CUSTOM_TOPOLOGY_Y.middle} V${CUSTOM_TOPOLOGY_Y.solar}`}
+                  vector-effect="non-scaling-stroke"
+                />
+                ${checkShouldShowDots(config) &&
+                individualObj.state &&
+                individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
+                  ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
+                        <animateMotion
+                          dur="${computeIndividualFlowRate(
+                            individualObj?.field?.calculate_flow_rate,
+                            duration
+                          )}s"
+                          repeatCount="indefinite"
+                          calcMode="paced"
+                          keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
+                          keyTimes="0;1"
+                        >
+                          <mpath xlink:href="#individual-top-right-home" />
+                        </animateMotion>
+                      </circle>`
+                  : nothing}
+              </svg>
+            </div>
           `
         : html`
             <div class="right-individual-flow-container">

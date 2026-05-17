@@ -120,7 +120,7 @@ describe("render", () => {
     expect(middleRow).toContain('id="home-circle"');
     expect(middleRow.match(/class="spacer"/g) ?? []).toHaveLength(0);
   });
-  test("routes custom topology bottom-right individual flow inline instead of absolute standard geometry", () => {
+  test("routes custom topology bottom-right individual flow through the shared custom overlay", () => {
     const markup = renderCard({
       type: "custom:power-flow-card-plus",
       allow_layout_break: true,
@@ -141,9 +141,15 @@ describe("render", () => {
     } as PowerFlowCardPlusConfig);
 
     expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('class="lines custom-topology-lines individual-right-top-flow"');
+    expect(markup).toContain('id="individual-right-top-home-flow"');
+    expect(markup).toContain('id="individual-top-right-home"');
+    expect(markup).toContain("d=M87.5,170 V60");
+    expect(markup).toContain('class="lines custom-topology-lines individual-right-bottom-flow"');
+    expect(markup).toContain('id="individual-right-bottom-home-flow"');
     expect(markup).toContain('id="individual-bottom-right-home"');
-    expect(markup).toContain('d="M40 40 v-40"');
-    expect(markup).not.toContain('class="right-individual-flow-container"');
+    expect(markup).toContain("viewBox=0 0 100 300");
+    expect(markup).toContain("d=M87.5,170 V280");
     expect(markup).not.toContain('d="M45,100 v-15 c0,-30 -10,-30 -30,-30 h-20"');
   });
 
