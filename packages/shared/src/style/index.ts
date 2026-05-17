@@ -162,6 +162,31 @@ export const styles = css`
     top: var(--lines-svg-not-flat-line-top);
   }
 
+  .lines.custom-topology-lines {
+    top: 0;
+    bottom: auto;
+    left: 0;
+    width: calc(var(--size-circle-entity) * 4);
+    height: 300px;
+    display: block;
+    margin-left: 0 !important;
+    padding: 0;
+  }
+
+  .card-content.no-labels .lines.custom-topology-lines {
+    transform: none;
+  }
+
+  .lines.custom-topology-lines svg,
+  .lines.custom-topology-lines svg:not(.flat-line) {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin-top: 0;
+  }
+
   .multi-individual {
     left: calc(var(--size-circle-entity) + 2%);
     margin-left: -2.2% !important;

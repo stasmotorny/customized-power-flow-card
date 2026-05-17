@@ -33,22 +33,23 @@ export const flowSolarToGrid = (
   if (!shouldShow) return nothing;
 
   const path = customTopologyHas
-    ? "M66.67,0 V50 H0"
+    ? "M200,60 V170 H40"
     : `M${battery.has ? 45 : 47},0 v15 c0,${
         battery.has ? "30 -10,30 -30,30" : "35 -10,35 -30,35"
       } h-20`;
 
   return html`<div
     class="lines ${classMap({
+      "custom-topology-lines": !!customTopologyHas,
       high: battery.has || checkHasBottomIndividual(individual),
       "individual1-individual2": !battery.has && individual.every((i) => i?.has),
       "multi-individual": checkHasRightIndividual(individual),
     })}"
   >
     <svg
-      viewBox="0 0 100 100"
+      viewBox=${customTopologyHas ? "0 0 320 300" : "0 0 100 100"}
       xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio=${customTopologyHas ? "none" : "xMidYMid slice"}
       id="solar-grid-flow"
     >
       <path

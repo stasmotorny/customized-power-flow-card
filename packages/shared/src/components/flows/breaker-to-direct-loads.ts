@@ -34,17 +34,17 @@ export const flowBreakerToDirectLoads = (
   const value = directLoads.state || 0;
 
   return html`
-    <div class="lines high">
+    <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 320 300"
         xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="none"
         id="breaker-direct-loads-flow"
       >
         <path
           id="breaker-direct-loads"
           class="grid ${styleLine(value, config)}"
-          d="M33.33,50 V0"
+          d="M120,170 V40"
           vector-effect="non-scaling-stroke"
         ></path>
 

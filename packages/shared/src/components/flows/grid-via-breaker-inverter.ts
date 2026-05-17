@@ -36,11 +36,11 @@ export const flowGridViaBreakerInverter = (
   const value = grid.state.toHome || 0;
 
   return html`
-    <div class="lines high">
+    <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 320 300"
         xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="none"
         id="grid-via-breaker-inverter-flow"
         class="flat-line"
       >
@@ -48,7 +48,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="grid-breaker"
           class="grid ${styleLine(value, config)}"
-          d="M0,50 H33.33"
+          d="M40,170 H120"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "grid-breaker")}
@@ -57,7 +57,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="breaker-inverter"
           class="grid ${styleLine(value, config)}"
-          d="M33.33,50 H66.67"
+          d="M120,170 H200"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "breaker-inverter")}
@@ -66,7 +66,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="inverter-home"
           class="grid ${styleLine(value, config)}"
-          d="M66.67,50 H100"
+          d="M200,170 H280"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "inverter-home")}
