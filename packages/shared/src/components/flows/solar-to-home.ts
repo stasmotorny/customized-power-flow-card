@@ -8,11 +8,7 @@ import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import { classMap } from "lit/directives/class-map.js";
-import {
-  CUSTOM_TOPOLOGY_VIEW_BOX,
-  CUSTOM_TOPOLOGY_X,
-  CUSTOM_TOPOLOGY_Y,
-} from "./custom-topology-geometry";
+import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 const solarToHomeDot = (
@@ -38,7 +34,7 @@ export const flowSolarToHome = (
   if (!shouldShow) return nothing;
 
   const path = customTopologyHas
-    ? `M${CUSTOM_TOPOLOGY_X.inverter},${CUSTOM_TOPOLOGY_Y.solar} V${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.home}`
+    ? customTopologyPath("solar", "home")
     : `M${battery.has ? 55 : 53},0 v${grid.has ? 15 : 17} c0,${
         battery.has ? "30 10,30 30,30" : "35 10,35 30,35"
       } h25`;

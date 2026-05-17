@@ -171,6 +171,7 @@ export const styles = css`
     display: block;
     margin-left: 0 !important;
     padding: 0;
+    z-index: 0;
   }
 
   .card-content.no-labels .lines.custom-topology-lines {
@@ -216,6 +217,13 @@ export const styles = css`
     grid-template-columns: repeat(4, minmax(0, 1fr));
     justify-content: stretch;
     justify-items: center;
+  }
+  .row.custom-topology-layout .circle {
+    background: var(
+      --ha-card-background,
+      var(--card-background-color, var(--primary-background-color))
+    );
+    z-index: 1;
   }
   .circle-container {
     display: flex;

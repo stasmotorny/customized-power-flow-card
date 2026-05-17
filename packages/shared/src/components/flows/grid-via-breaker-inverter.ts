@@ -3,11 +3,7 @@ import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-sh
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
-import {
-  CUSTOM_TOPOLOGY_VIEW_BOX,
-  CUSTOM_TOPOLOGY_X,
-  CUSTOM_TOPOLOGY_Y,
-} from "./custom-topology-geometry";
+import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 type FlowGridViaBreakerInverterFlows = Pick<Flows, "grid" | "newDur">;
@@ -53,7 +49,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="grid-breaker"
           class="grid ${styleLine(value, config)}"
-          d=${`M${CUSTOM_TOPOLOGY_X.grid},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.breaker}`}
+          d=${customTopologyPath("grid", "breaker")}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "grid-breaker")}
@@ -62,7 +58,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="breaker-inverter"
           class="grid ${styleLine(value, config)}"
-          d=${`M${CUSTOM_TOPOLOGY_X.breaker},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.inverter}`}
+          d=${customTopologyPath("breaker", "inverter")}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "breaker-inverter")}
@@ -71,7 +67,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="inverter-home"
           class="grid ${styleLine(value, config)}"
-          d=${`M${CUSTOM_TOPOLOGY_X.inverter},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.home}`}
+          d=${customTopologyPath("inverter", "home")}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "inverter-home")}
