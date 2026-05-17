@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import { flowElement } from "../src/components/flows";
+import { CUSTOM_TOPOLOGY_VIEW_BOX } from "../src/components/flows/custom-topology-geometry";
+import { styles } from "../src/style";
 import { type FlowCardPlusConfig } from "../src/types";
 
 type LitTemplateResult = {
@@ -122,14 +124,28 @@ describe("flowElement", () => {
     );
 
     expect(markup).toContain('class="lines custom-topology-lines"');
-    expect(markup).toContain('viewBox="0 0 320 300"');
-    expect(markup).toContain('d="M40,170 H120"');
-    expect(markup).toContain('d="M120,170 H200"');
-    expect(markup).toContain('d="M200,170 H280"');
-    expect(markup).toContain('d="M120,170 V40"');
-    expect(markup).toContain('d="M200,280 V170"');
-    expect(markup).toContain('d="M200,60 V170 H280"');
-    expect(markup).toContain('d="M200,60 V170 H40"');
-    expect(markup).toContain('d="M200,60 V280"');
+    expect(markup).toContain(`viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}`);
+    expect(markup).not.toContain('viewBox="0 0 320 300"');
+    expect(markup).toContain("d=M12.5,170 H37.5");
+    expect(markup).toContain("d=M37.5,170 H62.5");
+    expect(markup).toContain("d=M62.5,170 H87.5");
+    expect(markup).toContain("d=M37.5,170 V40");
+    expect(markup).toContain("d=M62.5,280 V170");
+    expect(markup).toContain('d="M62.5,60 V170 H87.5"');
+    expect(markup).toContain('d="M62.5,60 V170 H12.5"');
+    expect(markup).toContain('d="M62.5,60 V280"');
+  });
+
+  test("keeps custom topology rows and SVG overlay in the same horizontal coordinate system", () => {
+    const cssText = (styles as unknown as { cssText: string }).cssText;
+
+    expect(cssText).toContain(".lines.custom-topology-lines");
+    expect(cssText).toContain("width: 100%");
+    expect(cssText).not.toContain(
+      ".lines.custom-topology-lines {\n    top: 0;\n    bottom: auto;\n    left: 0;\n    width: calc(var(--size-circle-entity) * 4)"
+    );
+    expect(cssText).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
+    expect(cssText).toContain("justify-content: stretch");
+    expect(cssText).toContain("justify-items: center");
   });
 });

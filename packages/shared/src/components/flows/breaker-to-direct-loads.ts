@@ -3,6 +3,11 @@ import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-sh
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 type FlowBreakerToDirectLoadsFlows = Pick<Flows, "directLoads" | "newDur">;
@@ -36,7 +41,7 @@ export const flowBreakerToDirectLoads = (
   return html`
     <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 320 300"
+        viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         id="breaker-direct-loads-flow"
@@ -44,7 +49,7 @@ export const flowBreakerToDirectLoads = (
         <path
           id="breaker-direct-loads"
           class="grid ${styleLine(value, config)}"
-          d="M120,170 V40"
+          d=${`M${CUSTOM_TOPOLOGY_X.breaker},${CUSTOM_TOPOLOGY_Y.middle} V${CUSTOM_TOPOLOGY_Y.directLoads}`}
           vector-effect="non-scaling-stroke"
         ></path>
 
