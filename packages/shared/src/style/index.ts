@@ -178,15 +178,17 @@ export const styles = css`
   }
 
   .row {
-    //display: flex;
-    //justify-content: space-between;
-    //max-width: 500px;
-    //margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, var(--size-circle-entity));
+    display: flex;
     justify-content: space-between;
     max-width: 500px;
     margin: 0 auto;
+  }
+  .row.standard-layout {
+    display: flex;
+  }
+  .row.custom-topology-layout {
+    display: grid;
+    grid-template-columns: repeat(4, var(--size-circle-entity));
   }
   .circle-container {
     display: flex;
