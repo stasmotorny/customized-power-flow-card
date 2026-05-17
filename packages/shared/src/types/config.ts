@@ -115,6 +115,7 @@ interface CustomTopologyEntity extends BaseConfigEntity {
   display_zero_state?: boolean;
   color_value?: boolean;
   decimals?: number;
+  use_entity_state_for_custom_topology?: boolean;
 }
 
 interface FossilFuelPercentage extends BaseConfigEntity {

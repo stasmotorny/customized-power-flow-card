@@ -776,17 +776,17 @@ export class PowerFlowCardPlus extends LitElement {
       "mdi:home-lightning-bolt"
     );
     const customTopologyHas = breaker.has || inverter.has || directLoads.has;
+    const useDirectLoadsEntityForCustomTopology =
+      entities.direct_loads?.use_entity_state_for_custom_topology === true;
     const customTopologyFlows = computeCustomTopologyPowerFlows({
       breakerInput: breaker.state,
       inverterInput: inverter.state,
-      directLoadsInput: entities.direct_loads?.entity ? directLoads.state : null,
+      directLoadsInput: useDirectLoadsEntityForCustomTopology ? directLoads.state : null,
       batteryToHome: battery.state.toHome,
       inverterToBattery: grid.state.toBattery,
     });
 
     if (customTopologyHas) {
-      breaker.state = customTopologyFlows.gridToBreaker;
-      inverter.state = customTopologyFlows.breakerToInverter;
       directLoads.state = customTopologyFlows.breakerToDirectLoads;
       directLoads.has = directLoads.has || customTopologyFlows.breakerToDirectLoads > 0;
     }
