@@ -35,7 +35,7 @@ export const customTopologyDot = ({
       keyPoints="${invertAnimation ? "1;0" : "0;1"}"
       keyTimes="0;1"
     >
-      <mpath xlink:href="#${pathId}" />
+      <mpath href="#${pathId}" xlink:href="#${pathId}" />
     </animateMotion>
   </ellipse>
 `;

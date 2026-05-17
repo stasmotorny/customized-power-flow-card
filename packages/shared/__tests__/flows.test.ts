@@ -203,7 +203,7 @@ describe("flowElement", () => {
     );
 
     expect(markup.match(/class="lines custom-topology-lines"/g) ?? []).toHaveLength(1);
-    expect(markup).toContain(`viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}`);
+    expect(markup).toContain(`viewBox="${CUSTOM_TOPOLOGY_VIEW_BOX}"`);
     expect(markup).not.toContain('viewBox="0 0 320 300"');
     expect(markup).toContain('d="M12.5,170 H37.5"');
     expect(markup).toContain('d="M37.5,170 H62.5"');
