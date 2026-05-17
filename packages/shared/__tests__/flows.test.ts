@@ -1,7 +1,14 @@
 import { describe, expect, test } from "vitest";
 
 import { flowElement } from "../src/components/flows";
-import { CUSTOM_TOPOLOGY_VIEW_BOX } from "../src/components/flows/custom-topology-geometry";
+import {
+  CUSTOM_TOPOLOGY_NODE_CENTERS,
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  customTopologyIndividualKeyPoints,
+  customTopologyPath,
+} from "../src/components/flows/custom-topology-geometry";
+import { individualRightBottomElement } from "../src/components/individual-right-bottom-element";
+import { individualRightTopElement } from "../src/components/individual-right-top-element";
 import { styles } from "../src/style";
 import { type FlowCardPlusConfig } from "../src/types";
 
@@ -79,6 +86,52 @@ const expectRenderedFlows = (markup: string, expectedIds: string[], unexpectedId
   for (const id of unexpectedIds) expect(markup).not.toContain(`id="${id}"`);
 };
 
+const customTopologyFlowPathExpectations = [
+  ["grid", "breaker", "grid", "breaker"],
+  ["breaker", "inverter", "breaker", "inverter"],
+  ["inverter", "home", "inverter", "home"],
+  ["breaker", "directLoads", "breaker", "directLoads"],
+  ["battery", "inverter", "battery", "inverter"],
+  ["solar", "home", "solar", "home"],
+  ["solar", "grid", "solar", "grid"],
+  ["solar", "battery", "solar", "battery"],
+] as const;
+
+const main = {
+  hass: {},
+  onEntityClick: () => undefined,
+  onEntityDoubleClick: () => undefined,
+  onEntityPointerDown: () => undefined,
+  onEntityPointerUp: () => undefined,
+  openDetails: () => undefined,
+} as any;
+
+const individualConfig = {
+  ...config,
+  entities: {
+    home: {},
+    individual: [{ entity: "light.test" }],
+  },
+  disable_dots: false,
+} as unknown as FlowCardPlusConfig;
+
+const individualObj = {
+  has: true,
+  entity: "light.test",
+  field: { entity: "light.test" },
+  name: "Light",
+  icon: "mdi:lightbulb",
+  state: 100,
+  displayZeroTolerance: 0,
+  invertAnimation: false,
+} as any;
+
+const individualNewDur = {
+  ...baseFlows.newDur,
+  individual: [1],
+  nonFossil: 1,
+};
+
 describe("flowElement", () => {
   test("renders standard flows when custom topology is not configured", () => {
     const markup = templateToString(
@@ -136,6 +189,59 @@ describe("flowElement", () => {
     expect(markup).toContain('d="M62.5,60 V280"');
   });
 
+  test("builds every custom topology path from shared node-center geometry", () => {
+    const markup = templateToString(
+      flowElement(config, {
+        ...baseFlows,
+        customTopologyHas: true,
+      })
+    );
+
+    for (const [
+      pathSource,
+      pathTarget,
+      centerSource,
+      centerTarget,
+    ] of customTopologyFlowPathExpectations) {
+      expect(markup).toContain(customTopologyPath(pathSource, pathTarget));
+      expect(CUSTOM_TOPOLOGY_NODE_CENTERS[pathSource]).toEqual(
+        CUSTOM_TOPOLOGY_NODE_CENTERS[centerSource]
+      );
+      expect(CUSTOM_TOPOLOGY_NODE_CENTERS[pathTarget]).toEqual(
+        CUSTOM_TOPOLOGY_NODE_CENTERS[centerTarget]
+      );
+    }
+  });
+
+  test("custom individual paths use home-to-device node centers and positive flow animates outward", () => {
+    const rightTopMarkup = templateToString(
+      individualRightTopElement(main, individualConfig, {
+        individualObj,
+        displayState: "100 W",
+        newDur: individualNewDur,
+        templatesObj: { individual: [] },
+        battery: baseFlows.battery,
+        individualObjs: [individualObj],
+        customTopologyHas: true,
+      })
+    );
+    const rightBottomMarkup = templateToString(
+      individualRightBottomElement(main, individualConfig, {
+        individualObj,
+        displayState: "100 W",
+        newDur: individualNewDur,
+        templatesObj: { individual: [] },
+        customTopologyHas: true,
+      })
+    );
+
+    expect(rightTopMarkup).toContain(`d=${customTopologyPath("home", "rightTopIndividual")}`);
+    expect(rightBottomMarkup).toContain(`d=${customTopologyPath("home", "rightBottomIndividual")}`);
+    expect(rightTopMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
+    expect(rightBottomMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
+    expect(customTopologyIndividualKeyPoints(true)).toBe("1;0");
+  });
+
   test("keeps custom topology rows and SVG overlay in the same horizontal coordinate system", () => {
     const cssText = (styles as unknown as { cssText: string }).cssText;
 
@@ -150,5 +256,10 @@ describe("flowElement", () => {
     expect(cssText).toContain(".circle-container.battery.inverter");
     expect(cssText).toContain("height: auto");
     expect(cssText).toContain("justify-content: flex-start");
+    expect(cssText).toContain(".row.custom-topology-layout .circle");
+    expect(cssText).toContain("--ha-card-background");
+    expect(cssText).toContain("z-index: 1");
+    expect(cssText).toContain(".lines.custom-topology-lines");
+    expect(cssText).toContain("z-index: 0");
   });
 });

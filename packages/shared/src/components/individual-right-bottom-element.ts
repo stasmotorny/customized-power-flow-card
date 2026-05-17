@@ -12,8 +12,8 @@ import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import {
   CUSTOM_TOPOLOGY_VIEW_BOX,
-  CUSTOM_TOPOLOGY_X,
-  CUSTOM_TOPOLOGY_Y,
+  customTopologyIndividualKeyPoints,
+  customTopologyPath,
 } from "./flows/custom-topology-geometry";
 import { spacer } from "./spacer";
 import { individualSecondarySpan } from "./spans/individual-secondary-span";
@@ -106,7 +106,7 @@ export const individualRightBottomElement = (
                 <path
                   id="individual-bottom-right-home"
                   class="${styleLine(individualObj.state || 0, config)}"
-                  d=${`M${CUSTOM_TOPOLOGY_X.home},${CUSTOM_TOPOLOGY_Y.middle} V${CUSTOM_TOPOLOGY_Y.battery}`}
+                  d=${customTopologyPath("home", "rightBottomIndividual")}
                   vector-effect="non-scaling-stroke"
                 />
                 ${checkShouldShowDots(config) &&
@@ -120,7 +120,9 @@ export const individualRightBottomElement = (
                           )}s"
                           repeatCount="indefinite"
                           calcMode="paced"
-                          keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
+                          keyPoints="${customTopologyIndividualKeyPoints(
+                            individualObj.invertAnimation
+                          )}"
                           keyTimes="0;1"
                         >
                           <mpath xlink:href="#individual-bottom-right-home" />
