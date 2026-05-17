@@ -29,9 +29,7 @@ export const flowGridViaBreakerInverter = (
   { grid, newDur }: FlowGridViaBreakerInverterFlows
 ) => {
   const shouldShow =
-    grid.has &&
-    showLine(config, grid.state.fromGrid) &&
-    !config.entities.home?.hide;
+    grid.has && showLine(config, grid.state.fromGrid) && !config.entities.home?.hide;
 
   if (!shouldShow) return nothing;
 

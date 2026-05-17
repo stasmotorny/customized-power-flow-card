@@ -3,13 +3,13 @@ import { type FlowCardPlusConfig, type NewDur } from "@flixlix-cards/shared/type
 import { html } from "lit";
 import { flowBatteryToGrid } from "./battery-to-grid";
 import { flowBatteryToHome } from "./battery-to-home";
+import { flowBatteryToInverter } from "./battery-to-inverter";
+import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
 import { flowGridToHome } from "./grid-to-home";
+import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
 import { flowSolarToGrid } from "./solar-to-grid";
 import { flowSolarToHome } from "./solar-to-home";
 import { flowSolarToBattery } from "./solart-to-battery";
-import { flowBatteryToInverter } from "./battery-to-inverter";
-import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
-import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
 
 export interface Flows {
   battery: any;
