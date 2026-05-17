@@ -25,15 +25,23 @@ export const flowElement = (
   config: FlowCardPlusConfig,
   { battery, grid, individual, solar, directLoads, customTopologyHas, newDur }: Flows
 ) => {
+  const solarFlows = html`
+    ${flowSolarToHome(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
+    ${flowSolarToGrid(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
+    ${flowSolarToBattery(config, { battery, individual, solar, customTopologyHas, newDur })}
+  `;
+
+  if (customTopologyHas) {
+    return html`
+      ${solarFlows} ${flowGridViaBreakerInverter(config, { grid, newDur })}
+      ${flowBatteryToInverter(config, { battery, newDur })}
+      ${flowBreakerToDirectLoads(config, { directLoads, newDur })}
+    `;
+  }
+
   return html`
-  ${flowSolarToHome(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
-  ${flowSolarToGrid(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
-  ${flowSolarToBattery(config, { battery, individual, solar, customTopologyHas, newDur })}
-<!--  ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}-->
-  ${flowGridViaBreakerInverter(config, { grid, newDur })}
-<!--  ${flowBatteryToHome(config, { battery, grid, individual, newDur })}-->
-  ${flowBatteryToInverter(config, { battery, newDur })}
-<!--  ${flowBatteryToGrid(config, { battery, grid, individual, newDur })}-->
-  ${flowBreakerToDirectLoads(config, { directLoads, newDur })}
-</div>`;
+    ${solarFlows} ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}
+    ${flowBatteryToHome(config, { battery, grid, individual, newDur })}
+    ${flowBatteryToGrid(config, { battery, grid, individual, newDur })}
+  `;
 };
