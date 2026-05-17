@@ -8,15 +8,25 @@ import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { customTopologyDot } from "./custom-topology-dot";
 import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 const solarToBatteryDot = (
   config: FlowCardPlusConfig,
   solar: Flows["solar"],
-  newDur: Flows["newDur"]
+  newDur: Flows["newDur"],
+  customTopologyHas?: boolean
 ) => {
   if (!checkShouldShowDots(config) || !solar.state.toBattery) return nothing;
+
+  if (customTopologyHas) {
+    return customTopologyDot({
+      className: "battery-solar",
+      duration: newDur.solarToBattery,
+      pathId: "battery-solar",
+    });
+  }
 
   return svg`<circle r="1" class="battery-solar" vector-effect="non-scaling-stroke">
       <animateMotion dur="${newDur.solarToBattery}s" repeatCount="indefinite" calcMode="paced">
@@ -57,7 +67,7 @@ export const flowSolarToBattery = (
         d="${path}"
         vector-effect="non-scaling-stroke"
       ></path>
-      ${solarToBatteryDot(config, solar, newDur)}
+      ${solarToBatteryDot(config, solar, newDur, customTopologyHas)}
     </svg>
   </div>`;
 };

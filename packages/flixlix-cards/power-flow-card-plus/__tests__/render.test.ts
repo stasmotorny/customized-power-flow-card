@@ -32,6 +32,8 @@ const hass = {
     "sensor.breaker": { state: "100", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter": { state: "70", attributes: { unit_of_measurement: "W" } },
     "sensor.direct_loads": { state: "30", attributes: { unit_of_measurement: "W" } },
+    "sensor.breaker_221": { state: "221", attributes: { unit_of_measurement: "W" } },
+    "sensor.inverter_9": { state: "9", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_1": { state: "10", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_2": { state: "20", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_3": { state: "30", attributes: { unit_of_measurement: "W" } },
@@ -120,6 +122,25 @@ describe("render", () => {
     expect(middleRow).toContain('id="home-circle"');
     expect(middleRow.match(/class="spacer"/g) ?? []).toHaveLength(0);
   });
+  test("derives custom topology direct loads and renders balanced node values", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      entities: {
+        grid: { entity: "sensor.grid" },
+        solar: { entity: "sensor.solar" },
+        battery: { entity: "sensor.battery" },
+        breaker: { entity: "sensor.breaker_221" },
+        inverter: { entity: "sensor.inverter_9" },
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain("221 W");
+    expect(markup).toContain("9 W");
+    expect(markup).toContain("212 W");
+    expect(markup).toContain('class="circle-container individual-top"');
+  });
+
   test("routes custom topology bottom-right individual flow through the shared custom overlay", () => {
     const markup = renderCard({
       type: "custom:power-flow-card-plus",

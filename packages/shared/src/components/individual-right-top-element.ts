@@ -11,11 +11,8 @@ import { checkHasBottomIndividual } from "@flixlix-cards/shared/utils/compute-in
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
-import {
-  CUSTOM_TOPOLOGY_VIEW_BOX,
-  customTopologyIndividualKeyPoints,
-  customTopologyPath,
-} from "./flows/custom-topology-geometry";
+import { customTopologyDot } from "./flows/custom-topology-dot";
+import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./flows/custom-topology-geometry";
 import { spacer } from "./spacer";
 import { individualSecondarySpan } from "./spans/individual-secondary-span";
 
@@ -123,22 +120,15 @@ export const individualRightTopElement = (
                 ${checkShouldShowDots(config) &&
                 individualObj.state &&
                 individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
-                  ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
-                        <animateMotion
-                          dur="${computeIndividualFlowRate(
-                            individualObj?.field?.calculate_flow_rate,
-                            duration
-                          )}s"
-                          repeatCount="indefinite"
-                          calcMode="paced"
-                          keyPoints="${customTopologyIndividualKeyPoints(
-                            individualObj.invertAnimation
-                          )}"
-                          keyTimes="0;1"
-                        >
-                          <mpath xlink:href="#individual-top-right-home" />
-                        </animateMotion>
-                      </circle>`
+                  ? customTopologyDot({
+                      className: "individual-top",
+                      duration: computeIndividualFlowRate(
+                        individualObj?.field?.calculate_flow_rate,
+                        duration
+                      ),
+                      invertAnimation: individualObj.invertAnimation,
+                      pathId: "individual-top-right-home",
+                    })
                   : nothing}
               </svg>
             </div>

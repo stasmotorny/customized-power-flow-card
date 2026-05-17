@@ -1,5 +1,6 @@
 import { type IndividualObject } from "@flixlix-cards/shared/states/raw/individual/get-individual-object";
 import { type FlowCardPlusConfig, type NewDur } from "@flixlix-cards/shared/types";
+import { type CustomTopologyPowerFlows } from "@flixlix-cards/shared/utils/compute-custom-topology-power-flows";
 import { html } from "lit";
 import { flowBatteryToGrid } from "./battery-to-grid";
 import { flowBatteryToHome } from "./battery-to-home";
@@ -18,12 +19,22 @@ export interface Flows {
   solar: any;
   directLoads?: any;
   customTopologyHas?: boolean;
+  customTopologyFlows?: CustomTopologyPowerFlows;
   newDur: NewDur;
 }
 
 export const flowElement = (
   config: FlowCardPlusConfig,
-  { battery, grid, individual, solar, directLoads, customTopologyHas, newDur }: Flows
+  {
+    battery,
+    grid,
+    individual,
+    solar,
+    directLoads,
+    customTopologyHas,
+    customTopologyFlows,
+    newDur,
+  }: Flows
 ) => {
   const solarFlows = html`
     ${flowSolarToHome(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
@@ -33,9 +44,9 @@ export const flowElement = (
 
   if (customTopologyHas) {
     return html`
-      ${solarFlows} ${flowGridViaBreakerInverter(config, { grid, newDur })}
-      ${flowBatteryToInverter(config, { battery, newDur })}
-      ${flowBreakerToDirectLoads(config, { directLoads, newDur })}
+      ${solarFlows} ${flowGridViaBreakerInverter(config, { customTopologyFlows, grid, newDur })}
+      ${flowBatteryToInverter(config, { battery, customTopologyFlows, newDur })}
+      ${flowBreakerToDirectLoads(config, { customTopologyFlows, directLoads, newDur })}
     `;
   }
 
