@@ -1,13 +1,8 @@
-import { html } from "lit";
+import { type CardMainContext, type FlowCardPlusConfig } from "@flixlix-cards/shared/types";
+import { customPowerNodeElement, type CustomPowerNode } from "./custom-power-node";
 
-export const inverterElement = () => {
-  return html`
-    <div class="circle-container battery">
-      <div class="circle">
-        <ha-icon .icon=${"mdi:current-ac"}></ha-icon>
-        <span>TEST</span>
-      </div>
-      <span class="label">Інвертор</span>
-    </div>
-  `;
-};
+export const inverterElement = (
+  main: CardMainContext,
+  config: FlowCardPlusConfig,
+  inverter: CustomPowerNode
+) => customPowerNodeElement(main, config, inverter, "battery");

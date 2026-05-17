@@ -1,13 +1,8 @@
-import { html } from "lit";
+import { type CardMainContext, type FlowCardPlusConfig } from "@flixlix-cards/shared/types";
+import { customPowerNodeElement, type CustomPowerNode } from "./custom-power-node";
 
-export const directLoadsElement = () => {
-  return html`
-    <div class="circle-container individual-top">
-      <div class="circle">
-        <ha-icon .icon=${"mdi:home-lightning-bolt"}></ha-icon>
-        <span>TEST</span>
-      </div>
-      <span class="label">Потужні прилади</span>
-    </div>
-  `;
-};
+export const directLoadsElement = (
+  main: CardMainContext,
+  config: FlowCardPlusConfig,
+  directLoads: CustomPowerNode
+) => customPowerNodeElement(main, config, directLoads, "individual-top");

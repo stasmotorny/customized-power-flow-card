@@ -1,4 +1,7 @@
 import { batteryElement } from "@flixlix-cards/shared/components/battery";
+import { breakerElement } from "@flixlix-cards/shared/components/breaker";
+import { type CustomPowerNode } from "@flixlix-cards/shared/components/custom-power-node";
+import { directLoadsElement } from "@flixlix-cards/shared/components/direct-loads";
 import { flowElement } from "@flixlix-cards/shared/components/flows/index";
 import { gridElement } from "@flixlix-cards/shared/components/grid";
 import { homeElement } from "@flixlix-cards/shared/components/home";
@@ -6,6 +9,7 @@ import { individualLeftBottomElement } from "@flixlix-cards/shared/components/in
 import { individualLeftTopElement } from "@flixlix-cards/shared/components/individual-left-top-element";
 import { individualRightBottomElement } from "@flixlix-cards/shared/components/individual-right-bottom-element";
 import { individualRightTopElement } from "@flixlix-cards/shared/components/individual-right-top-element";
+import { inverterElement } from "@flixlix-cards/shared/components/inverter";
 import { dashboardLinkElement } from "@flixlix-cards/shared/components/misc/dashboard-link";
 import { nonFossilElement } from "@flixlix-cards/shared/components/non-fossil";
 import { solarElement } from "@flixlix-cards/shared/components/solar";
@@ -80,9 +84,6 @@ import { type UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import packageJson from "../package.json" with { type: "json" };
-import { breakerElement } from "@flixlix-cards/shared/components/breaker";
-import { inverterElement } from "@flixlix-cards/shared/components/inverter";
-import { directLoadsElement } from "@flixlix-cards/shared/components/direct-loads";
 
 registerCustomCard({
   type: "power-flow-card-plus",
@@ -92,7 +93,7 @@ registerCustomCard({
   version: packageJson.version,
 });
 
-console.log('MY LOCAL POWER FLOW CARD LOADED_kokok');
+console.log("MY LOCAL POWER FLOW CARD LOADED_kokok");
 
 @customElement("power-flow-card-plus")
 export class PowerFlowCardPlus extends LitElement {
@@ -123,6 +124,10 @@ export class PowerFlowCardPlus extends LitElement {
         solar: any;
         battery: any;
         home: any;
+        breaker: CustomPowerNode;
+        inverter: CustomPowerNode;
+        directLoads: CustomPowerNode;
+        customTopologyHas: boolean;
         nonFossil: any;
         individualObjs: IndividualObject[];
         newDur: NewDur;
@@ -369,6 +374,10 @@ export class PowerFlowCardPlus extends LitElement {
       solar,
       battery,
       home,
+      breaker,
+      inverter,
+      directLoads,
+      customTopologyHas,
       nonFossil,
       individualObjs,
       newDur,
@@ -407,6 +416,7 @@ export class PowerFlowCardPlus extends LitElement {
           style=${this._config.style_card_content ? this._config.style_card_content : ""}
         >
           ${solar.has ||
+          directLoads.has ||
           individualObjs?.some((individual) => individual?.has) ||
           nonFossil.hasPercentage
             ? html`<div class="row">
@@ -423,18 +433,17 @@ export class PowerFlowCardPlus extends LitElement {
                       solar,
                       templatesObj,
                     })
-                  // : individualObjs?.some((individual) => individual?.has)
-                  //   ? spacer
-                  //   : nothing}
-                  : directLoadsElement()}
-                ${individualFieldLeftTop
-                  ? individualLeftTopElement(this, this._config, {
-                      individualObj: individualFieldLeftTop,
-                      displayState: getIndividualDisplayState(individualFieldLeftTop),
-                      newDur,
-                      templatesObj,
-                    })
                   : spacer}
+                ${directLoads.has
+                  ? directLoadsElement(this, this._config, directLoads)
+                  : individualFieldLeftTop
+                    ? individualLeftTopElement(this, this._config, {
+                        individualObj: individualFieldLeftTop,
+                        displayState: getIndividualDisplayState(individualFieldLeftTop),
+                        newDur,
+                        templatesObj,
+                      })
+                    : spacer}
                 ${checkHasRightIndividual(individualObjs)
                   ? individualRightTopElement(this, this._config, {
                       displayState: getIndividualDisplayState(individualFieldRightTop),
@@ -455,9 +464,9 @@ export class PowerFlowCardPlus extends LitElement {
                   templatesObj,
                 })
               : spacer}
-<!--            ${spacer}-->
-            ${breakerElement()}
-            ${inverterElement()}
+            <!--            ${spacer}-->
+            ${customTopologyHas ? breakerElement(this, this._config, breaker) : spacer}
+            ${customTopologyHas ? inverterElement(this, this._config, inverter) : spacer}
             ${!entities.home?.hide
               ? homeElement(this, this._config, {
                   CIRCLE_CIRCUMFERENCE,
@@ -478,8 +487,7 @@ export class PowerFlowCardPlus extends LitElement {
           </div>
           ${battery.has || checkHasBottomIndividual(individualObjs)
             ? html`<div class="row">
-                ${spacer}
-                ${spacer}
+                ${spacer} ${spacer}
                 ${battery.has ? batteryElement(this, this._config, { battery, entities }) : spacer}
                 ${individualFieldLeftBottom
                   ? individualLeftBottomElement(this, this._config, {
@@ -505,6 +513,7 @@ export class PowerFlowCardPlus extends LitElement {
             individual: individualObjs,
             newDur,
             solar,
+            directLoads,
           })}
         </div>
         ${dashboardLinkElement(this._config, this.hass)}
@@ -702,6 +711,37 @@ export class PowerFlowCardPlus extends LitElement {
         circle_type: entities.battery?.color_circle,
       },
     };
+    const getCustomPowerNode = (
+      key: "breaker" | "inverter" | "direct_loads",
+      defaultName: string,
+      defaultIcon: string
+    ): CustomPowerNode => {
+      const entity = entities[key];
+      const state = entity?.entity ? getEntityStateWatts(this.hass, entity.entity) : null;
+      const hasVisibleState = (state ?? 0) !== 0 || entity?.display_zero !== false;
+      return {
+        entity: entity?.entity,
+        has: entity?.entity !== undefined && hasVisibleState,
+        state,
+        icon: computeFieldIcon(this.hass, entity, defaultIcon),
+        name: computeFieldName(this.hass, entity, defaultName),
+        unit: entity?.unit_of_measurement,
+        unit_white_space: entity?.unit_white_space,
+        decimals: entity?.decimals,
+        display_zero_state: entity?.display_zero_state,
+        tap_action: entity?.tap_action,
+        hold_action: entity?.hold_action,
+        double_tap_action: entity?.double_tap_action,
+      };
+    };
+    const breaker = getCustomPowerNode("breaker", "Вхідний автомат", "mdi:electric-switch");
+    const inverter = getCustomPowerNode("inverter", "Інвертор", "mdi:current-ac");
+    const directLoads = getCustomPowerNode(
+      "direct_loads",
+      "Потужні прилади",
+      "mdi:home-lightning-bolt"
+    );
+    const customTopologyHas = breaker.has || inverter.has || directLoads.has;
     const home = {
       entity: entities.home?.entity,
       has: entities?.home?.entity !== undefined,
@@ -899,7 +939,8 @@ export class PowerFlowCardPlus extends LitElement {
       (solar.state.toBattery ?? 0) +
       (battery.state.toHome ?? 0) +
       (grid.state.toBattery ?? 0) +
-      (battery.state.toGrid ?? 0);
+      (battery.state.toGrid ?? 0) +
+      (directLoads.state ?? 0);
     if (battery.state_of_charge.state === null) {
       battery.icon = "mdi:battery";
     } else if (battery.state_of_charge.state <= 72 && battery.state_of_charge.state > 44) {
@@ -933,6 +974,7 @@ export class PowerFlowCardPlus extends LitElement {
           computeFlowRate(this._config, individual.state ?? 0, totalIndividualConsumption)
         ) || [],
       nonFossil: computeFlowRate(this._config, nonFossil.state.power ?? 0, totalLines),
+      directLoads: computeFlowRate(this._config, directLoads.state ?? 0, totalLines),
     };
     if (checkShouldShowDots(this._config)) {
       type AnimatedFlowName =
@@ -1053,6 +1095,10 @@ export class PowerFlowCardPlus extends LitElement {
       solar,
       battery,
       home,
+      breaker,
+      inverter,
+      directLoads,
+      customTopologyHas,
       nonFossil,
       individualObjs: visibleIndividualObjects,
       newDur,

@@ -3,25 +3,26 @@ import { type FlowCardPlusConfig, type NewDur } from "@flixlix-cards/shared/type
 import { html } from "lit";
 import { flowBatteryToGrid } from "./battery-to-grid";
 import { flowBatteryToHome } from "./battery-to-home";
+import { flowBatteryToInverter } from "./battery-to-inverter";
+import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
 import { flowGridToHome } from "./grid-to-home";
+import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
 import { flowSolarToGrid } from "./solar-to-grid";
 import { flowSolarToHome } from "./solar-to-home";
 import { flowSolarToBattery } from "./solart-to-battery";
-import { flowBatteryToInverter } from "./battery-to-inverter";
-import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
-import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
 
 export interface Flows {
   battery: any;
   grid: any;
   individual: IndividualObject[];
   solar: any;
+  directLoads?: any;
   newDur: NewDur;
 }
 
 export const flowElement = (
   config: FlowCardPlusConfig,
-  { battery, grid, individual, solar, newDur }: Flows
+  { battery, grid, individual, solar, directLoads, newDur }: Flows
 ) => {
   return html`
   ${flowSolarToHome(config, { battery, grid, individual, solar, newDur })}
@@ -32,6 +33,6 @@ export const flowElement = (
 <!--  ${flowBatteryToHome(config, { battery, grid, individual, newDur })}-->
   ${flowBatteryToInverter(config, { battery, newDur })}
 <!--  ${flowBatteryToGrid(config, { battery, grid, individual, newDur })}-->
-  ${flowBreakerToDirectLoads(config, { grid, newDur })}
+  ${flowBreakerToDirectLoads(config, { directLoads, newDur })}
 </div>`;
 };
