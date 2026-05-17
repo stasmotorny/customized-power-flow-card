@@ -120,5 +120,16 @@ describe("flowElement", () => {
       ],
       ["grid-home-flow", "battery-home-flow", "battery-grid-flow"]
     );
+
+    expect(markup).toContain('class="lines custom-topology-lines"');
+    expect(markup).toContain('viewBox="0 0 320 300"');
+    expect(markup).toContain('d="M40,170 H120"');
+    expect(markup).toContain('d="M120,170 H200"');
+    expect(markup).toContain('d="M200,170 H280"');
+    expect(markup).toContain('d="M120,170 V40"');
+    expect(markup).toContain('d="M200,280 V170"');
+    expect(markup).toContain('d="M200,60 V170 H280"');
+    expect(markup).toContain('d="M200,60 V170 H40"');
+    expect(markup).toContain('d="M200,60 V280"');
   });
 });

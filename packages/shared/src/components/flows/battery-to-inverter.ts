@@ -33,17 +33,17 @@ export const flowBatteryToInverter = (
   if (!shouldShow) return nothing;
 
   return html`
-    <div class="lines high">
+    <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 100 100"
+        viewBox="0 0 320 300"
         xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="none"
         id="battery-inverter-flow"
       >
         <path
           id="battery-inverter"
           class="battery-home ${styleLine(battery.state.toHome || 0, config)}"
-          d="M66.67,100 V50"
+          d="M200,280 V170"
           vector-effect="non-scaling-stroke"
         ></path>
 
