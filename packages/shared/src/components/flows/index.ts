@@ -7,6 +7,9 @@ import { flowGridToHome } from "./grid-to-home";
 import { flowSolarToGrid } from "./solar-to-grid";
 import { flowSolarToHome } from "./solar-to-home";
 import { flowSolarToBattery } from "./solart-to-battery";
+import { flowBatteryToInverter } from "./battery-to-inverter";
+import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
+import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
 
 export interface Flows {
   battery: any;
@@ -24,8 +27,11 @@ export const flowElement = (
   ${flowSolarToHome(config, { battery, grid, individual, solar, newDur })}
   ${flowSolarToGrid(config, { battery, grid, individual, solar, newDur })}
   ${flowSolarToBattery(config, { battery, individual, solar, newDur })}
-  ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}
-  ${flowBatteryToHome(config, { battery, grid, individual, newDur })}
-  ${flowBatteryToGrid(config, { battery, grid, individual, newDur })}
+<!--  ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}-->
+  ${flowGridViaBreakerInverter(config, { grid, newDur })}
+<!--  ${flowBatteryToHome(config, { battery, grid, individual, newDur })}-->
+  ${flowBatteryToInverter(config, { battery, newDur })}
+<!--  ${flowBatteryToGrid(config, { battery, grid, individual, newDur })}-->
+  ${flowBreakerToDirectLoads(config, { grid, newDur })}
 </div>`;
 };

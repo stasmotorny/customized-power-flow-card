@@ -80,6 +80,9 @@ import { type UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, nothing, type PropertyValues, type TemplateResult } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import packageJson from "../package.json" with { type: "json" };
+import { breakerElement } from "@flixlix-cards/shared/components/breaker";
+import { inverterElement } from "@flixlix-cards/shared/components/inverter";
+import { directLoadsElement } from "@flixlix-cards/shared/components/direct-loads";
 
 registerCustomCard({
   type: "power-flow-card-plus",
@@ -88,6 +91,8 @@ registerCustomCard({
     "An extended version of the power flow card with richer options, advanced features and a few small UI enhancements. Inspired by the Energy Dashboard.",
   version: packageJson.version,
 });
+
+console.log('MY LOCAL POWER FLOW CARD LOADED_kokok');
 
 @customElement("power-flow-card-plus")
 export class PowerFlowCardPlus extends LitElement {
@@ -418,9 +423,10 @@ export class PowerFlowCardPlus extends LitElement {
                       solar,
                       templatesObj,
                     })
-                  : individualObjs?.some((individual) => individual?.has)
-                    ? spacer
-                    : nothing}
+                  // : individualObjs?.some((individual) => individual?.has)
+                  //   ? spacer
+                  //   : nothing}
+                  : directLoadsElement()}
                 ${individualFieldLeftTop
                   ? individualLeftTopElement(this, this._config, {
                       individualObj: individualFieldLeftTop,
@@ -449,7 +455,9 @@ export class PowerFlowCardPlus extends LitElement {
                   templatesObj,
                 })
               : spacer}
-            ${spacer}
+<!--            ${spacer}-->
+            ${breakerElement()}
+            ${inverterElement()}
             ${!entities.home?.hide
               ? homeElement(this, this._config, {
                   CIRCLE_CIRCUMFERENCE,
@@ -470,6 +478,7 @@ export class PowerFlowCardPlus extends LitElement {
           </div>
           ${battery.has || checkHasBottomIndividual(individualObjs)
             ? html`<div class="row">
+                ${spacer}
                 ${spacer}
                 ${battery.has ? batteryElement(this, this._config, { battery, entities }) : spacer}
                 ${individualFieldLeftBottom

@@ -178,7 +178,12 @@ export const styles = css`
   }
 
   .row {
-    display: flex;
+    //display: flex;
+    //justify-content: space-between;
+    //max-width: 500px;
+    //margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, var(--size-circle-entity));
     justify-content: space-between;
     max-width: 500px;
     margin: 0 auto;
