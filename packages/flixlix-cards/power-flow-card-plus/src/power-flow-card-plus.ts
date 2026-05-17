@@ -419,7 +419,7 @@ export class PowerFlowCardPlus extends LitElement {
       const center = CUSTOM_TOPOLOGY_NODE_CENTERS[nodeName];
       return html`<div
         class="custom-topology-node custom-topology-node-${nodeName}"
-        style="--custom-topology-x: ${center.x}; --custom-topology-y: ${center.y};"
+        style="left: ${center.x}%; top: ${center.y}px;"
       >
         ${content}
       </div>`;
