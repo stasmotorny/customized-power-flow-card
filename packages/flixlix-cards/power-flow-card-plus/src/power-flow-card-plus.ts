@@ -2,6 +2,10 @@ import { batteryElement } from "@flixlix-cards/shared/components/battery";
 import { breakerElement } from "@flixlix-cards/shared/components/breaker";
 import { type CustomPowerNode } from "@flixlix-cards/shared/components/custom-power-node";
 import { directLoadsElement } from "@flixlix-cards/shared/components/direct-loads";
+import {
+  CUSTOM_TOPOLOGY_NODE_CENTERS,
+  type CustomTopologyNodeName,
+} from "@flixlix-cards/shared/components/flows/custom-topology-geometry";
 import { flowElement } from "@flixlix-cards/shared/components/flows/index";
 import { gridElement } from "@flixlix-cards/shared/components/grid";
 import { homeElement } from "@flixlix-cards/shared/components/home";
@@ -411,6 +415,143 @@ export class PowerFlowCardPlus extends LitElement {
       });
     };
     const layoutClass = customTopologyHas ? "custom-topology-layout" : "standard-layout";
+    const customTopologyNodeSlot = (nodeName: CustomTopologyNodeName, content: unknown) => {
+      const center = CUSTOM_TOPOLOGY_NODE_CENTERS[nodeName];
+      return html`<div
+        class="custom-topology-node custom-topology-node-${nodeName}"
+        style="--custom-topology-x: ${center.x}; --custom-topology-y: ${center.y};"
+      >
+        ${content}
+      </div>`;
+    };
+    const customTopologyStage = customTopologyHas
+      ? html`<div class="custom-topology-stage">
+          ${flowElement(this._config, {
+            battery,
+            grid,
+            individual: individualObjs,
+            newDur,
+            solar,
+            directLoads,
+            customTopologyHas,
+            customTopologyFlows,
+          })}
+          ${grid.has
+            ? customTopologyNodeSlot(
+                "grid",
+                gridElement(this, this._config, {
+                  entities,
+                  grid,
+                  templatesObj,
+                })
+              )
+            : nothing}
+          ${breaker.has
+            ? customTopologyNodeSlot("breaker", breakerElement(this, this._config, breaker))
+            : nothing}
+          ${inverter.has
+            ? customTopologyNodeSlot("inverter", inverterElement(this, this._config, inverter))
+            : nothing}
+          ${!entities.home?.hide
+            ? customTopologyNodeSlot(
+                "home",
+                homeElement(this, this._config, {
+                  CIRCLE_CIRCUMFERENCE,
+                  entities,
+                  grid,
+                  home,
+                  homeBatteryCircumference,
+                  homeGridCircumference,
+                  homeNonFossilCircumference,
+                  homeSolarCircumference,
+                  newDur,
+                  templatesObj,
+                  homeUsageToDisplay,
+                  individual: individualObjs,
+                })
+              )
+            : nothing}
+          ${directLoads.has
+            ? customTopologyNodeSlot(
+                "directLoads",
+                directLoadsElement(this, this._config, directLoads)
+              )
+            : individualFieldLeftTop
+              ? customTopologyNodeSlot(
+                  "directLoads",
+                  individualLeftTopElement(this, this._config, {
+                    individualObj: individualFieldLeftTop,
+                    displayState: getIndividualDisplayState(individualFieldLeftTop),
+                    newDur,
+                    templatesObj,
+                  })
+                )
+              : nothing}
+          ${solar.has
+            ? customTopologyNodeSlot(
+                "solar",
+                solarElement(this, this._config, {
+                  entities,
+                  solar,
+                  templatesObj,
+                })
+              )
+            : nonFossil.hasPercentage
+              ? customTopologyNodeSlot(
+                  "solar",
+                  nonFossilElement(this, this._config, {
+                    entities,
+                    grid,
+                    newDur,
+                    nonFossil,
+                    templatesObj,
+                  })
+                )
+              : nothing}
+          ${battery.has
+            ? customTopologyNodeSlot(
+                "battery",
+                batteryElement(this, this._config, { battery, entities })
+              )
+            : individualFieldLeftBottom
+              ? customTopologyNodeSlot(
+                  "battery",
+                  individualLeftBottomElement(this, this._config, {
+                    displayState: getIndividualDisplayState(individualFieldLeftBottom),
+                    individualObj: individualFieldLeftBottom,
+                    newDur,
+                    templatesObj,
+                  })
+                )
+              : nothing}
+          ${individualFieldRightTop
+            ? customTopologyNodeSlot(
+                "rightTopIndividual",
+                individualRightTopElement(this, this._config, {
+                  displayState: getIndividualDisplayState(individualFieldRightTop),
+                  individualObj: individualFieldRightTop,
+                  newDur,
+                  templatesObj,
+                  battery,
+                  individualObjs,
+                  customTopologyHas,
+                })
+              )
+            : nothing}
+          ${individualFieldRightBottom
+            ? customTopologyNodeSlot(
+                "rightBottomIndividual",
+                individualRightBottomElement(this, this._config, {
+                  displayState: getIndividualDisplayState(individualFieldRightBottom),
+                  individualObj: individualFieldRightBottom,
+                  newDur,
+                  templatesObj,
+                  customTopologyHas,
+                })
+              )
+            : nothing}
+        </div>`
+      : nothing;
 
     return html`
       <ha-card
@@ -425,130 +566,116 @@ export class PowerFlowCardPlus extends LitElement {
           id="power-flow-card-plus"
           style=${this._config.style_card_content ? this._config.style_card_content : ""}
         >
-          ${solar.has ||
-          directLoads.has ||
-          individualObjs?.some((individual) => individual?.has) ||
-          nonFossil.hasPercentage
-            ? html`<div class="row ${layoutClass}">
-                ${nonFossilElement(this, this._config, {
-                  entities,
-                  grid,
-                  newDur,
-                  nonFossil,
-                  templatesObj,
-                })}
-                ${customTopologyHas
-                  ? directLoads.has
-                    ? directLoadsElement(this, this._config, directLoads)
-                    : individualFieldLeftTop
-                      ? individualLeftTopElement(this, this._config, {
-                          individualObj: individualFieldLeftTop,
-                          displayState: getIndividualDisplayState(individualFieldLeftTop),
-                          newDur,
-                          templatesObj,
-                        })
-                      : spacer
-                  : solar.has
-                    ? solarElement(this, this._config, {
+          ${customTopologyHas
+            ? customTopologyStage
+            : html`
+                ${solar.has ||
+                directLoads.has ||
+                individualObjs?.some((individual) => individual?.has) ||
+                nonFossil.hasPercentage
+                  ? html`<div class="row ${layoutClass}">
+                      ${nonFossilElement(this, this._config, {
                         entities,
-                        solar,
+                        grid,
+                        newDur,
+                        nonFossil,
                         templatesObj,
-                      })
-                    : individualObjs?.some((individual) => individual?.has)
-                      ? spacer
-                      : nothing}
-                ${customTopologyHas
-                  ? solar.has
-                    ? solarElement(this, this._config, {
-                        entities,
-                        solar,
-                        templatesObj,
-                      })
-                    : spacer
-                  : directLoads.has
-                    ? directLoadsElement(this, this._config, directLoads)
-                    : individualFieldLeftTop
-                      ? individualLeftTopElement(this, this._config, {
-                          individualObj: individualFieldLeftTop,
-                          displayState: getIndividualDisplayState(individualFieldLeftTop),
-                          newDur,
-                          templatesObj,
-                        })
-                      : spacer}
-                ${checkHasRightIndividual(individualObjs)
-                  ? individualRightTopElement(this, this._config, {
-                      displayState: getIndividualDisplayState(individualFieldRightTop),
-                      individualObj: individualFieldRightTop,
-                      newDur,
-                      templatesObj,
-                      battery,
-                      individualObjs,
-                      customTopologyHas,
-                    })
+                      })}
+                      ${solar.has
+                        ? solarElement(this, this._config, {
+                            entities,
+                            solar,
+                            templatesObj,
+                          })
+                        : individualObjs?.some((individual) => individual?.has)
+                          ? spacer
+                          : nothing}
+                      ${directLoads.has
+                        ? directLoadsElement(this, this._config, directLoads)
+                        : individualFieldLeftTop
+                          ? individualLeftTopElement(this, this._config, {
+                              individualObj: individualFieldLeftTop,
+                              displayState: getIndividualDisplayState(individualFieldLeftTop),
+                              newDur,
+                              templatesObj,
+                            })
+                          : spacer}
+                      ${checkHasRightIndividual(individualObjs)
+                        ? individualRightTopElement(this, this._config, {
+                            displayState: getIndividualDisplayState(individualFieldRightTop),
+                            individualObj: individualFieldRightTop,
+                            newDur,
+                            templatesObj,
+                            battery,
+                            individualObjs,
+                            customTopologyHas,
+                          })
+                        : nothing}
+                    </div>`
                   : nothing}
-              </div>`
-            : nothing}
-          <div class="row ${layoutClass}">
-            ${grid.has
-              ? gridElement(this, this._config, {
-                  entities,
-                  grid,
-                  templatesObj,
-                })
-              : spacer}
-            ${customTopologyHas ? breakerElement(this, this._config, breaker) : spacer}
-            ${customTopologyHas ? inverterElement(this, this._config, inverter) : nothing}
-            ${!entities.home?.hide
-              ? homeElement(this, this._config, {
-                  CIRCLE_CIRCUMFERENCE,
-                  entities,
-                  grid,
-                  home,
-                  homeBatteryCircumference,
-                  homeGridCircumference,
-                  homeNonFossilCircumference,
-                  homeSolarCircumference,
-                  newDur,
-                  templatesObj,
-                  homeUsageToDisplay,
-                  individual: individualObjs,
-                })
-              : spacer}
-            ${checkHasRightIndividual(individualObjs) ? spacer : nothing}
-          </div>
-          ${battery.has || checkHasBottomIndividual(individualObjs)
-            ? html`<div class="row ${layoutClass}">
-                ${spacer} ${customTopologyHas ? spacer : nothing}
-                ${battery.has ? batteryElement(this, this._config, { battery, entities }) : spacer}
-                ${individualFieldLeftBottom
-                  ? individualLeftBottomElement(this, this._config, {
-                      displayState: getIndividualDisplayState(individualFieldLeftBottom),
-                      individualObj: individualFieldLeftBottom,
-                      newDur,
-                      templatesObj,
-                    })
+                <div class="row ${layoutClass}">
+                  ${grid.has
+                    ? gridElement(this, this._config, {
+                        entities,
+                        grid,
+                        templatesObj,
+                      })
+                    : spacer}
+                  ${spacer}
+                  ${!entities.home?.hide
+                    ? homeElement(this, this._config, {
+                        CIRCLE_CIRCUMFERENCE,
+                        entities,
+                        grid,
+                        home,
+                        homeBatteryCircumference,
+                        homeGridCircumference,
+                        homeNonFossilCircumference,
+                        homeSolarCircumference,
+                        newDur,
+                        templatesObj,
+                        homeUsageToDisplay,
+                        individual: individualObjs,
+                      })
+                    : spacer}
+                  ${checkHasRightIndividual(individualObjs) ? spacer : nothing}
+                </div>
+                ${battery.has || checkHasBottomIndividual(individualObjs)
+                  ? html`<div class="row ${layoutClass}">
+                      ${spacer}
+                      ${battery.has
+                        ? batteryElement(this, this._config, { battery, entities })
+                        : spacer}
+                      ${individualFieldLeftBottom
+                        ? individualLeftBottomElement(this, this._config, {
+                            displayState: getIndividualDisplayState(individualFieldLeftBottom),
+                            individualObj: individualFieldLeftBottom,
+                            newDur,
+                            templatesObj,
+                          })
+                        : spacer}
+                      ${checkHasRightIndividual(individualObjs)
+                        ? individualRightBottomElement(this, this._config, {
+                            displayState: getIndividualDisplayState(individualFieldRightBottom),
+                            individualObj: individualFieldRightBottom,
+                            newDur,
+                            templatesObj,
+                            customTopologyHas,
+                          })
+                        : nothing}
+                    </div>`
                   : spacer}
-                ${checkHasRightIndividual(individualObjs)
-                  ? individualRightBottomElement(this, this._config, {
-                      displayState: getIndividualDisplayState(individualFieldRightBottom),
-                      individualObj: individualFieldRightBottom,
-                      newDur,
-                      templatesObj,
-                      customTopologyHas,
-                    })
-                  : nothing}
-              </div>`
-            : spacer}
-          ${flowElement(this._config, {
-            battery,
-            grid,
-            individual: individualObjs,
-            newDur,
-            solar,
-            directLoads,
-            customTopologyHas,
-            customTopologyFlows,
-          })}
+                ${flowElement(this._config, {
+                  battery,
+                  grid,
+                  individual: individualObjs,
+                  newDur,
+                  solar,
+                  directLoads,
+                  customTopologyHas,
+                  customTopologyFlows,
+                })}
+              `}
         </div>
         ${dashboardLinkElement(this._config, this.hass)}
       </ha-card>
@@ -923,8 +1050,33 @@ export class PowerFlowCardPlus extends LitElement {
       nonFossil.hasPercentage = false;
       nonFossil.state.power = 0;
     }
-    const totalIndividualConsumption =
-      individualObjs?.reduce((a, b) => a + (b.has ? b.state || 0 : 0), 0) || 0;
+    const isCardWideEnough = this._width > 420;
+    const sortedIndividualObjects = this._config.sort_individual_devices
+      ? sortIndividualObjects(individualObjs)
+      : individualObjs;
+    const maxVisibleIndividuals = this._config.allow_layout_break
+      ? 4
+      : this._width >= this.wideEnoughForFourIndividuals
+        ? 4
+        : 2;
+
+    const filteredNotShownIndividualObjects = sortedIndividualObjects.filter(
+      (individual) => individual.has
+    );
+    const visibleIndividualObjects = filteredNotShownIndividualObjects.slice(
+      0,
+      maxVisibleIndividuals
+    );
+
+    const individualFieldLeftTop = getTopLeftIndividual(visibleIndividualObjects);
+    const individualFieldLeftBottom = getBottomLeftIndividual(visibleIndividualObjects);
+    const individualFieldRightTop = getTopRightIndividual(visibleIndividualObjects);
+    const individualFieldRightBottom = getBottomRightIndividual(visibleIndividualObjects);
+
+    const totalIndividualConsumption = visibleIndividualObjects.reduce(
+      (total, individual) => total + (individual.has ? individual.state || 0 : 0),
+      0
+    );
     const standardHomeConsumption =
       (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0);
     const customTopologyHomeBranchConsumption =
@@ -1143,29 +1295,6 @@ export class PowerFlowCardPlus extends LitElement {
           (_, index) => this._templateResults[`${individualKeys[index]}Secondary`]?.result
         ) || [],
     };
-
-    const isCardWideEnough = this._width > 420;
-    const sortedIndividualObjects = this._config.sort_individual_devices
-      ? sortIndividualObjects(individualObjs)
-      : individualObjs;
-    const maxVisibleIndividuals = this._config.allow_layout_break
-      ? 4
-      : this._width >= this.wideEnoughForFourIndividuals
-        ? 4
-        : 2;
-
-    const filteredNotShownIndividualObjects = sortedIndividualObjects.filter(
-      (individual) => individual.has
-    );
-    const visibleIndividualObjects = filteredNotShownIndividualObjects.slice(
-      0,
-      maxVisibleIndividuals
-    );
-
-    const individualFieldLeftTop = getTopLeftIndividual(visibleIndividualObjects);
-    const individualFieldLeftBottom = getBottomLeftIndividual(visibleIndividualObjects);
-    const individualFieldRightTop = getTopRightIndividual(visibleIndividualObjects);
-    const individualFieldRightBottom = getBottomRightIndividual(visibleIndividualObjects);
 
     allDynamicStyles(
       this as any,
