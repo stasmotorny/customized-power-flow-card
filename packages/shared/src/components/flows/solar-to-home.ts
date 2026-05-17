@@ -8,15 +8,21 @@ import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { customTopologyDot } from "./custom-topology-dot";
 import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 const solarToHomeDot = (
   config: FlowCardPlusConfig,
   solar: Flows["solar"],
-  newDur: Flows["newDur"]
+  newDur: Flows["newDur"],
+  customTopologyHas?: boolean
 ) => {
   if (!checkShouldShowDots(config) || !solar.state.toHome) return nothing;
+
+  if (customTopologyHas) {
+    return customTopologyDot({ className: "solar", duration: newDur.solarToHome, pathId: "solar" });
+  }
 
   return svg`<circle r="1" class="solar" vector-effect="non-scaling-stroke">
       <animateMotion dur="${newDur.solarToHome}s" repeatCount="indefinite" calcMode="paced">
@@ -59,7 +65,7 @@ export const flowSolarToHome = (
         d="${path}"
         vector-effect="non-scaling-stroke"
       ></path>
-      ${solarToHomeDot(config, solar, newDur)}
+      ${solarToHomeDot(config, solar, newDur, customTopologyHas)}
     </svg>
   </div>`;
 };

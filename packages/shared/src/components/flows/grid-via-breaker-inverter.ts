@@ -2,39 +2,48 @@ import { type FlowCardPlusConfig } from "@flixlix-cards/shared/types";
 import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-show-dots";
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
-import { html, nothing, svg } from "lit";
+import { html, nothing } from "lit";
+import { customTopologyDot } from "./custom-topology-dot";
 import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
-type FlowGridViaBreakerInverterFlows = Pick<Flows, "grid" | "newDur">;
+type FlowGridViaBreakerInverterFlows = Pick<Flows, "customTopologyFlows" | "grid" | "newDur">;
 
-const flowDot = (
+const customFlowPath = (
   config: FlowCardPlusConfig,
-  grid: FlowGridViaBreakerInverterFlows["grid"],
-  newDur: FlowGridViaBreakerInverterFlows["newDur"],
-  pathId: string
+  pathId: string,
+  className: string,
+  path: string,
+  value: number,
+  duration: number | undefined
 ) => {
-  if (!checkShouldShowDots(config) || !grid.state.toHome) return nothing;
+  if (!showLine(config, value)) return nothing;
 
-  return svg`
-    <circle r="1" class="grid" vector-effect="non-scaling-stroke">
-      <animateMotion dur="${newDur.gridToHome}s" repeatCount="indefinite" calcMode="paced">
-        <mpath xlink:href="#${pathId}" />
-      </animateMotion>
-    </circle>
+  return html`
+    <path
+      id="${pathId}"
+      class="${className} ${styleLine(value, config)}"
+      d="${path}"
+      vector-effect="non-scaling-stroke"
+    ></path>
+    ${checkShouldShowDots(config) && value > 0
+      ? customTopologyDot({ className, duration, pathId })
+      : nothing}
   `;
 };
 
 export const flowGridViaBreakerInverter = (
   config: FlowCardPlusConfig,
-  { grid, newDur }: FlowGridViaBreakerInverterFlows
+  { customTopologyFlows, grid, newDur }: FlowGridViaBreakerInverterFlows
 ) => {
-  const shouldShow =
-    grid.has && showLine(config, grid.state.fromGrid) && !config.entities.home?.hide;
+  const flows = customTopologyFlows ?? {
+    gridToBreaker: grid.state.toHome || 0,
+    breakerToInverter: grid.state.toHome || 0,
+    inverterToHome: grid.state.toHome || 0,
+  };
+  const shouldShow = grid.has && !config.entities.home?.hide;
 
   if (!shouldShow) return nothing;
-
-  const value = grid.state.toHome || 0;
 
   return html`
     <div class="lines custom-topology-lines">
@@ -46,31 +55,34 @@ export const flowGridViaBreakerInverter = (
         class="flat-line"
       >
         <!-- Grid → Breaker -->
-        <path
-          id="grid-breaker"
-          class="grid ${styleLine(value, config)}"
-          d=${customTopologyPath("grid", "breaker")}
-          vector-effect="non-scaling-stroke"
-        ></path>
-        ${flowDot(config, grid, newDur, "grid-breaker")}
+        ${customFlowPath(
+          config,
+          "grid-breaker",
+          "grid",
+          customTopologyPath("grid", "breaker"),
+          flows.gridToBreaker,
+          newDur.gridToBreaker
+        )}
 
         <!-- Breaker → Inverter -->
-        <path
-          id="breaker-inverter"
-          class="grid ${styleLine(value, config)}"
-          d=${customTopologyPath("breaker", "inverter")}
-          vector-effect="non-scaling-stroke"
-        ></path>
-        ${flowDot(config, grid, newDur, "breaker-inverter")}
+        ${customFlowPath(
+          config,
+          "breaker-inverter",
+          "grid",
+          customTopologyPath("breaker", "inverter"),
+          flows.breakerToInverter,
+          newDur.breakerToInverter
+        )}
 
         <!-- Inverter → Home -->
-        <path
-          id="inverter-home"
-          class="grid ${styleLine(value, config)}"
-          d=${customTopologyPath("inverter", "home")}
-          vector-effect="non-scaling-stroke"
-        ></path>
-        ${flowDot(config, grid, newDur, "inverter-home")}
+        ${customFlowPath(
+          config,
+          "inverter-home",
+          "grid",
+          customTopologyPath("inverter", "home"),
+          flows.inverterToHome,
+          newDur.inverterToHome
+        )}
       </svg>
     </div>
   `;

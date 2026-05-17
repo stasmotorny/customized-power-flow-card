@@ -2,37 +2,21 @@ import { type FlowCardPlusConfig } from "@flixlix-cards/shared/types";
 import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-show-dots";
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
-import { html, nothing, svg } from "lit";
+import { html, nothing } from "lit";
+import { customTopologyDot } from "./custom-topology-dot";
 import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
-type FlowBreakerToDirectLoadsFlows = Pick<Flows, "directLoads" | "newDur">;
-
-const breakerToDirectLoadsDot = (
-  config: FlowCardPlusConfig,
-  directLoads: FlowBreakerToDirectLoadsFlows["directLoads"],
-  newDur: FlowBreakerToDirectLoadsFlows["newDur"]
-) => {
-  if (!checkShouldShowDots(config) || !directLoads.state) return nothing;
-
-  return svg`
-    <circle r="1" class="grid" vector-effect="non-scaling-stroke">
-      <animateMotion dur="${newDur.directLoads}s" repeatCount="indefinite" calcMode="paced">
-        <mpath xlink:href="#breaker-direct-loads" />
-      </animateMotion>
-    </circle>
-  `;
-};
+type FlowBreakerToDirectLoadsFlows = Pick<Flows, "customTopologyFlows" | "directLoads" | "newDur">;
 
 export const flowBreakerToDirectLoads = (
   config: FlowCardPlusConfig,
-  { directLoads, newDur }: FlowBreakerToDirectLoadsFlows
+  { customTopologyFlows, directLoads, newDur }: FlowBreakerToDirectLoadsFlows
 ) => {
-  const shouldShow = directLoads?.has && showLine(config, directLoads.state);
+  const value = customTopologyFlows?.breakerToDirectLoads ?? directLoads?.state ?? 0;
+  const shouldShow = (directLoads?.has || value > 0) && showLine(config, value);
 
   if (!shouldShow) return nothing;
-
-  const value = directLoads.state || 0;
 
   return html`
     <div class="lines custom-topology-lines">
@@ -49,7 +33,13 @@ export const flowBreakerToDirectLoads = (
           vector-effect="non-scaling-stroke"
         ></path>
 
-        ${breakerToDirectLoadsDot(config, directLoads, newDur)}
+        ${checkShouldShowDots(config) && value > 0
+          ? customTopologyDot({
+              className: "grid",
+              duration: newDur.directLoads,
+              pathId: "breaker-direct-loads",
+            })
+          : nothing}
       </svg>
     </div>
   `;

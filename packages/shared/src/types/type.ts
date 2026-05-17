@@ -138,6 +138,11 @@ export type NewDur = {
   individual: number[];
   nonFossil: number;
   directLoads?: number;
+  gridToBreaker?: number;
+  breakerToInverter?: number;
+  inverterToHome?: number;
+  batteryToInverter?: number;
+  inverterToBattery?: number;
 };
 
 export type GridObject = {

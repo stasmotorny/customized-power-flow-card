@@ -56,6 +56,7 @@ import {
   type TemplatesObj,
 } from "@flixlix-cards/shared/types";
 import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-show-dots";
+import { computeCustomTopologyPowerFlows } from "@flixlix-cards/shared/utils/compute-custom-topology-power-flows";
 import {
   computeFieldIcon,
   computeFieldName,
@@ -114,6 +115,11 @@ export class PowerFlowCardPlus extends LitElement {
   @query("#battery-grid-flow") batteryGridFlow?: SVGSVGElement;
   @query("#battery-home-flow") batteryToHomeFlow?: SVGSVGElement;
   @query("#grid-home-flow") gridToHomeFlow?: SVGSVGElement;
+  @query("#grid-via-breaker-inverter-flow") gridToBreakerFlow?: SVGSVGElement;
+  @query("#grid-via-breaker-inverter-flow") breakerToInverterFlow?: SVGSVGElement;
+  @query("#grid-via-breaker-inverter-flow") inverterToHomeFlow?: SVGSVGElement;
+  @query("#battery-inverter-flow") batteryToInverterFlow?: SVGSVGElement;
+  @query("#battery-inverter-flow") inverterToBatteryFlow?: SVGSVGElement;
   @query("#solar-battery-flow") solarToBatteryFlow?: SVGSVGElement;
   @query("#solar-grid-flow") solarToGridFlow?: SVGSVGElement;
   @query("#solar-home-flow") solarToHomeFlow?: SVGSVGElement;
@@ -129,6 +135,7 @@ export class PowerFlowCardPlus extends LitElement {
         inverter: CustomPowerNode;
         directLoads: CustomPowerNode;
         customTopologyHas: boolean;
+        customTopologyFlows: ReturnType<typeof computeCustomTopologyPowerFlows>;
         nonFossil: any;
         individualObjs: IndividualObject[];
         newDur: NewDur;
@@ -379,6 +386,7 @@ export class PowerFlowCardPlus extends LitElement {
       inverter,
       directLoads,
       customTopologyHas,
+      customTopologyFlows,
       nonFossil,
       individualObjs,
       newDur,
@@ -539,6 +547,7 @@ export class PowerFlowCardPlus extends LitElement {
             solar,
             directLoads,
             customTopologyHas,
+            customTopologyFlows,
           })}
         </div>
         ${dashboardLinkElement(this._config, this.hass)}
@@ -767,6 +776,20 @@ export class PowerFlowCardPlus extends LitElement {
       "mdi:home-lightning-bolt"
     );
     const customTopologyHas = breaker.has || inverter.has || directLoads.has;
+    const customTopologyFlows = computeCustomTopologyPowerFlows({
+      breakerInput: breaker.state,
+      inverterInput: inverter.state,
+      directLoadsInput: entities.direct_loads?.entity ? directLoads.state : null,
+      batteryToHome: battery.state.toHome,
+      inverterToBattery: grid.state.toBattery,
+    });
+
+    if (customTopologyHas) {
+      breaker.state = customTopologyFlows.gridToBreaker;
+      inverter.state = customTopologyFlows.breakerToInverter;
+      directLoads.state = customTopologyFlows.breakerToDirectLoads;
+      directLoads.has = directLoads.has || customTopologyFlows.breakerToDirectLoads > 0;
+    }
     const home = {
       entity: entities.home?.entity,
       has: entities?.home?.entity !== undefined,
@@ -903,7 +926,9 @@ export class PowerFlowCardPlus extends LitElement {
     const totalIndividualConsumption =
       individualObjs?.reduce((a, b) => a + (b.has ? b.state || 0 : 0), 0) || 0;
     const totalHomeConsumption = Math.max(
-      (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0),
+      customTopologyHas
+        ? customTopologyFlows.inverterToHome + (solar.state.toHome ?? 0)
+        : (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0),
       0
     );
     const homeBatteryCircumference = battery.state.toHome
@@ -957,15 +982,24 @@ export class PowerFlowCardPlus extends LitElement {
               unit: entities.home?.unit_of_measurement,
               unitWhiteSpace: entities.home?.unit_white_space,
             });
-    const totalLines =
-      (grid.state.toHome ?? 0) +
-      (solar.state.toHome ?? 0) +
-      (solar.state.toGrid ?? 0) +
-      (solar.state.toBattery ?? 0) +
-      (battery.state.toHome ?? 0) +
-      (grid.state.toBattery ?? 0) +
-      (battery.state.toGrid ?? 0) +
-      (directLoads.state ?? 0);
+    const totalLines = customTopologyHas
+      ? customTopologyFlows.gridToBreaker +
+        customTopologyFlows.breakerToInverter +
+        customTopologyFlows.breakerToDirectLoads +
+        customTopologyFlows.inverterToHome +
+        customTopologyFlows.batteryToInverter +
+        customTopologyFlows.inverterToBattery +
+        (solar.state.toHome ?? 0) +
+        (solar.state.toGrid ?? 0) +
+        (solar.state.toBattery ?? 0)
+      : (grid.state.toHome ?? 0) +
+        (solar.state.toHome ?? 0) +
+        (solar.state.toGrid ?? 0) +
+        (solar.state.toBattery ?? 0) +
+        (battery.state.toHome ?? 0) +
+        (grid.state.toBattery ?? 0) +
+        (battery.state.toGrid ?? 0) +
+        (directLoads.state ?? 0);
     if (battery.state_of_charge.state === null) {
       battery.icon = "mdi:battery";
     } else if (battery.state_of_charge.state <= 72 && battery.state_of_charge.state > 44) {
@@ -999,7 +1033,28 @@ export class PowerFlowCardPlus extends LitElement {
           computeFlowRate(this._config, individual.state ?? 0, totalIndividualConsumption)
         ) || [],
       nonFossil: computeFlowRate(this._config, nonFossil.state.power ?? 0, totalLines),
-      directLoads: computeFlowRate(this._config, directLoads.state ?? 0, totalLines),
+      directLoads: computeFlowRate(
+        this._config,
+        customTopologyHas ? customTopologyFlows.breakerToDirectLoads : (directLoads.state ?? 0),
+        totalLines
+      ),
+      gridToBreaker: computeFlowRate(this._config, customTopologyFlows.gridToBreaker, totalLines),
+      breakerToInverter: computeFlowRate(
+        this._config,
+        customTopologyFlows.breakerToInverter,
+        totalLines
+      ),
+      inverterToHome: computeFlowRate(this._config, customTopologyFlows.inverterToHome, totalLines),
+      batteryToInverter: computeFlowRate(
+        this._config,
+        customTopologyFlows.batteryToInverter,
+        totalLines
+      ),
+      inverterToBattery: computeFlowRate(
+        this._config,
+        customTopologyFlows.inverterToBattery,
+        totalLines
+      ),
     };
     if (checkShouldShowDots(this._config)) {
       type AnimatedFlowName =
@@ -1009,7 +1064,12 @@ export class PowerFlowCardPlus extends LitElement {
         | "solarToBattery"
         | "solarToGrid"
         | "solarToHome"
-        | "directLoads";
+        | "directLoads"
+        | "gridToBreaker"
+        | "breakerToInverter"
+        | "inverterToHome"
+        | "batteryToInverter"
+        | "inverterToBattery";
       const flowNames: AnimatedFlowName[] = [
         "batteryGrid",
         "batteryToHome",
@@ -1018,6 +1078,11 @@ export class PowerFlowCardPlus extends LitElement {
         "solarToGrid",
         "solarToHome",
         "directLoads",
+        "gridToBreaker",
+        "breakerToInverter",
+        "inverterToHome",
+        "batteryToInverter",
+        "inverterToBattery",
       ];
       flowNames.forEach((flowName) => {
         const duration = newDur[flowName];
@@ -1129,6 +1194,7 @@ export class PowerFlowCardPlus extends LitElement {
       inverter,
       directLoads,
       customTopologyHas,
+      customTopologyFlows,
       nonFossil,
       individualObjs: visibleIndividualObjects,
       newDur,

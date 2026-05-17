@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { flowElement } from "../src/components/flows";
+import { customTopologyDot } from "../src/components/flows/custom-topology-dot";
 import {
   CUSTOM_TOPOLOGY_NODE_CENTERS,
   CUSTOM_TOPOLOGY_VIEW_BOX,
@@ -11,6 +12,7 @@ import { individualRightBottomElement } from "../src/components/individual-right
 import { individualRightTopElement } from "../src/components/individual-right-top-element";
 import { styles } from "../src/style";
 import { type FlowCardPlusConfig } from "../src/types";
+import { computeCustomTopologyPowerFlows } from "../src/utils/compute-custom-topology-power-flows";
 
 type LitTemplateResult = {
   strings?: readonly string[];
@@ -38,6 +40,11 @@ const config = {
     mode: "hide",
   },
   disable_dots: true,
+} as unknown as FlowCardPlusConfig;
+
+const animatedConfig = {
+  ...config,
+  disable_dots: false,
 } as unknown as FlowCardPlusConfig;
 
 const baseFlows = {
@@ -78,6 +85,11 @@ const baseFlows = {
     solarToBattery: 1,
     solarToGrid: 1,
     solarToHome: 1,
+    gridToBreaker: 1,
+    breakerToInverter: 1,
+    inverterToHome: 1,
+    batteryToInverter: 1,
+    inverterToBattery: 1,
   },
 };
 
@@ -155,6 +167,31 @@ describe("flowElement", () => {
     );
   });
 
+  test("computes balanced custom topology power flows", () => {
+    const derived = computeCustomTopologyPowerFlows({
+      breakerInput: 221,
+      inverterInput: 9,
+      directLoadsInput: null,
+    });
+
+    expect(derived.breakerToInverter).toBe(9);
+    expect(derived.breakerToDirectLoads).toBe(212);
+    expect(derived.gridToBreaker).toBe(221);
+    expect(derived.gridToBreaker).toBe(derived.breakerToInverter + derived.breakerToDirectLoads);
+
+    const explicitBranchesWin = computeCustomTopologyPowerFlows({
+      breakerInput: 221,
+      inverterInput: 9,
+      directLoadsInput: 30,
+    });
+
+    expect(explicitBranchesWin.breakerToDirectLoads).toBe(30);
+    expect(explicitBranchesWin.gridToBreaker).toBe(39);
+    expect(explicitBranchesWin.gridToBreaker).toBe(
+      explicitBranchesWin.breakerToInverter + explicitBranchesWin.breakerToDirectLoads
+    );
+  });
+
   test("renders custom topology flows instead of standard grid and battery home flows", () => {
     const markup = templateToString(
       flowElement(config, {
@@ -179,14 +216,54 @@ describe("flowElement", () => {
     expect(markup).toContain('class="lines custom-topology-lines"');
     expect(markup).toContain(`viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}`);
     expect(markup).not.toContain('viewBox="0 0 320 300"');
-    expect(markup).toContain("d=M12.5,170 H37.5");
-    expect(markup).toContain("d=M37.5,170 H62.5");
-    expect(markup).toContain("d=M62.5,170 H87.5");
+    expect(markup).toContain('d="M12.5,170 H37.5"');
+    expect(markup).toContain('d="M37.5,170 H62.5"');
+    expect(markup).toContain('d="M62.5,170 H87.5"');
     expect(markup).toContain("d=M37.5,170 V40");
     expect(markup).toContain("d=M62.5,280 V170");
     expect(markup).toContain('d="M62.5,60 V170 H87.5"');
     expect(markup).toContain('d="M62.5,60 V170 H12.5"');
     expect(markup).toContain('d="M62.5,60 V280"');
+  });
+
+  test("animates each active custom topology path from its own flow value", () => {
+    const markup = templateToString(
+      flowElement(animatedConfig, {
+        ...baseFlows,
+        customTopologyHas: true,
+        customTopologyFlows: {
+          gridToBreaker: 221,
+          breakerToInverter: 9,
+          breakerToDirectLoads: 212,
+          inverterToHome: 9,
+          batteryToInverter: 0,
+          inverterToBattery: 0,
+        },
+      })
+    );
+
+    expect(markup).toContain('id="grid-breaker"');
+    expect(markup).toContain('xlink:href="#grid-breaker"');
+    expect(markup).toContain('dur="1s"');
+    expect(markup).toContain('id="breaker-inverter"');
+    expect(markup).toContain('xlink:href="#breaker-inverter"');
+    expect(markup).toContain('id="breaker-direct-loads"');
+    expect(markup).toContain('xlink:href="#breaker-direct-loads"');
+    expect(markup).toContain('id="inverter-home"');
+    expect(markup).toContain('xlink:href="#inverter-home"');
+    expect(markup).toContain("<ellipse");
+    expect(markup).toContain('class="grid custom-topology-dot"');
+  });
+
+  test("custom topology dot rendering uses compensated ellipses instead of distorted circles", () => {
+    const dot = templateToString(
+      customTopologyDot({ className: "grid", duration: 2, pathId: "grid-breaker" })
+    );
+
+    expect(dot).toContain("<ellipse");
+    expect(dot).toContain('rx="0.6"');
+    expect(dot).toContain('ry="3"');
+    expect(dot).not.toContain("<circle");
   });
 
   test("builds every custom topology path from shared node-center geometry", () => {
