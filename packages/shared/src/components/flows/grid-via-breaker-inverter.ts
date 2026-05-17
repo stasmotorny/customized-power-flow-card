@@ -48,7 +48,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="grid-breaker"
           class="grid ${styleLine(value, config)}"
-          d="M0,50 H25"
+          d="M0,50 H33.33"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "grid-breaker")}
@@ -57,7 +57,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="breaker-inverter"
           class="grid ${styleLine(value, config)}"
-          d="M25,50 H55"
+          d="M33.33,50 H66.67"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "breaker-inverter")}
@@ -66,7 +66,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="inverter-home"
           class="grid ${styleLine(value, config)}"
-          d="M55,50 H100"
+          d="M66.67,50 H100"
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "inverter-home")}

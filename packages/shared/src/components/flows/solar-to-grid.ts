@@ -26,11 +26,17 @@ const solarToGridDot = (
 
 export const flowSolarToGrid = (
   config: FlowCardPlusConfig,
-  { battery, grid, individual, solar, newDur }: Flows
+  { battery, grid, individual, solar, customTopologyHas, newDur }: Flows
 ) => {
   const shouldShow =
     grid.has && grid.hasReturnToGrid && solar.has && showLine(config, solar.state.toGrid || 0);
   if (!shouldShow) return nothing;
+
+  const path = customTopologyHas
+    ? "M66.67,0 V50 H0"
+    : `M${battery.has ? 45 : 47},0 v15 c0,${
+        battery.has ? "30 -10,30 -30,30" : "35 -10,35 -30,35"
+      } h-20`;
 
   return html`<div
     class="lines ${classMap({
@@ -48,9 +54,7 @@ export const flowSolarToGrid = (
       <path
         id="return"
         class="return ${styleLine(solar.state.toGrid || 0, config)}"
-        d="M${battery.has ? 45 : 47},0 v15 c0,${battery.has
-          ? "30 -10,30 -30,30"
-          : "35 -10,35 -30,35"} h-20"
+        d="${path}"
         vector-effect="non-scaling-stroke"
       ></path>
       ${solarToGridDot(config, solar, newDur)}

@@ -26,11 +26,17 @@ const solarToHomeDot = (
 
 export const flowSolarToHome = (
   config: FlowCardPlusConfig,
-  { battery, grid, individual, solar, newDur }: Flows
+  { battery, grid, individual, solar, customTopologyHas, newDur }: Flows
 ) => {
   const shouldShow =
     solar.has && showLine(config, solar.state.toHome || 0) && !config.entities.home?.hide;
   if (!shouldShow) return nothing;
+
+  const path = customTopologyHas
+    ? "M66.67,0 V50 H100"
+    : `M${battery.has ? 55 : 53},0 v${grid.has ? 15 : 17} c0,${
+        battery.has ? "30 10,30 30,30" : "35 10,35 30,35"
+      } h25`;
 
   return html`<div
     class="lines ${classMap({
@@ -48,9 +54,7 @@ export const flowSolarToHome = (
       <path
         id="solar"
         class="solar ${styleLine(solar.state.toHome || 0, config)}"
-        d="M${battery.has ? 55 : 53},0 v${grid.has ? 15 : 17} c0,${battery.has
-          ? "30 10,30 30,30"
-          : "35 10,35 30,35"} h25"
+        d="${path}"
         vector-effect="non-scaling-stroke"
       ></path>
       ${solarToHomeDot(config, solar, newDur)}

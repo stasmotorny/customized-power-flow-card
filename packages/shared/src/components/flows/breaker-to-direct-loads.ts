@@ -44,7 +44,7 @@ export const flowBreakerToDirectLoads = (
         <path
           id="breaker-direct-loads"
           class="grid ${styleLine(value, config)}"
-          d="M33.33,50 C33.33,25 66.67,25 66.67,0"
+          d="M33.33,50 V0"
           vector-effect="non-scaling-stroke"
         ></path>
 

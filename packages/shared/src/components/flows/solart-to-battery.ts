@@ -28,10 +28,12 @@ type FlowSolarToBatteryFlows = Pick<Flows, Exclude<keyof Flows, "grid">>;
 
 export const flowSolarToBattery = (
   config: FlowCardPlusConfig,
-  { battery, individual, solar, newDur }: FlowSolarToBatteryFlows
+  { battery, individual, solar, customTopologyHas, newDur }: FlowSolarToBatteryFlows
 ) => {
   const shouldShow = battery.has && solar.has && showLine(config, solar.state.toBattery || 0);
   if (!shouldShow) return nothing;
+
+  const path = customTopologyHas ? "M66.67,0 V100" : "M50,0 V100";
 
   return html`<div
     class="lines ${classMap({
@@ -50,7 +52,7 @@ export const flowSolarToBattery = (
       <path
         id="battery-solar"
         class="battery-solar ${styleLine(solar.state.toBattery || 0, config)}"
-        d="M50,0 V100"
+        d="${path}"
         vector-effect="non-scaling-stroke"
       ></path>
       ${solarToBatteryDot(config, solar, newDur)}
