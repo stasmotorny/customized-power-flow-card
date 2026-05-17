@@ -8,8 +8,6 @@ import {
   customTopologyIndividualKeyPoints,
   customTopologyPath,
 } from "../src/components/flows/custom-topology-geometry";
-import { individualRightBottomElement } from "../src/components/individual-right-bottom-element";
-import { individualRightTopElement } from "../src/components/individual-right-top-element";
 import { styles } from "../src/style";
 import { type FlowCardPlusConfig } from "../src/types";
 import { computeCustomTopologyPowerFlows } from "../src/utils/compute-custom-topology-power-flows";
@@ -109,24 +107,6 @@ const customTopologyFlowPathExpectations = [
   ["solar", "battery", "solar", "battery"],
 ] as const;
 
-const main = {
-  hass: {},
-  onEntityClick: () => undefined,
-  onEntityDoubleClick: () => undefined,
-  onEntityPointerDown: () => undefined,
-  onEntityPointerUp: () => undefined,
-  openDetails: () => undefined,
-} as any;
-
-const individualConfig = {
-  ...config,
-  entities: {
-    home: {},
-    individual: [{ entity: "light.test" }],
-  },
-  disable_dots: false,
-} as unknown as FlowCardPlusConfig;
-
 const individualObj = {
   has: true,
   entity: "light.test",
@@ -137,12 +117,6 @@ const individualObj = {
   displayZeroTolerance: 0,
   invertAnimation: false,
 } as any;
-
-const individualNewDur = {
-  ...baseFlows.newDur,
-  individual: [1],
-  nonFossil: 1,
-};
 
 describe("flowElement", () => {
   test("renders standard flows when custom topology is not configured", () => {
@@ -205,24 +179,37 @@ describe("flowElement", () => {
     expectRenderedFlows(
       markup,
       [
+        "custom-topology-flow-overlay",
+        "grid-breaker",
+        "breaker-inverter",
+        "inverter-home",
+        "breaker-direct-loads",
+        "battery-inverter",
+        "solar",
+        "return",
+        "solar-battery",
+      ],
+      [
         "solar-home-flow",
         "solar-grid-flow",
         "solar-battery-flow",
         "grid-via-breaker-inverter-flow",
         "battery-inverter-flow",
         "breaker-direct-loads-flow",
-      ],
-      ["grid-home-flow", "battery-home-flow", "battery-grid-flow"]
+        "grid-home-flow",
+        "battery-home-flow",
+        "battery-grid-flow",
+      ]
     );
 
-    expect(markup).toContain('class="lines custom-topology-lines"');
+    expect(markup.match(/class="lines custom-topology-lines"/g) ?? []).toHaveLength(1);
     expect(markup).toContain(`viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}`);
     expect(markup).not.toContain('viewBox="0 0 320 300"');
     expect(markup).toContain('d="M12.5,170 H37.5"');
     expect(markup).toContain('d="M37.5,170 H62.5"');
     expect(markup).toContain('d="M62.5,170 H87.5"');
-    expect(markup).toContain("d=M37.5,170 V40");
-    expect(markup).toContain("d=M62.5,280 V170");
+    expect(markup).toContain('d="M37.5,170 V40"');
+    expect(markup).toContain('d="M62.5,280 V170"');
     expect(markup).toContain('d="M62.5,60 V170 H87.5"');
     expect(markup).toContain('d="M62.5,60 V170 H12.5"');
     expect(markup).toContain('d="M62.5,60 V280"');
@@ -295,7 +282,9 @@ describe("flowElement", () => {
     expect(cssText).toContain("ellipse.individual-top");
     expect(cssText).toContain("ellipse.individual-bottom");
     expect(cssText).toContain(".individual-right-top ellipse.individual-top");
+    expect(cssText).toContain("ellipse.individual-right-top");
     expect(cssText).toContain(".individual-right-bottom ellipse.individual-bottom");
+    expect(cssText).toContain("ellipse.individual-right-bottom");
   });
 
   test("custom topology dot rendering uses compensated ellipses instead of distorted circles", () => {
@@ -333,34 +322,42 @@ describe("flowElement", () => {
     }
   });
 
-  test("custom individual paths use home-to-device node centers and positive flow animates outward", () => {
-    const rightTopMarkup = templateToString(
-      individualRightTopElement(main, individualConfig, {
-        individualObj,
-        displayState: "100 W",
-        newDur: individualNewDur,
-        templatesObj: { individual: [] },
-        battery: baseFlows.battery,
-        individualObjs: [individualObj],
-        customTopologyHas: true,
-      })
-    );
-    const rightBottomMarkup = templateToString(
-      individualRightBottomElement(main, individualConfig, {
-        individualObj,
-        displayState: "100 W",
-        newDur: individualNewDur,
-        templatesObj: { individual: [] },
+  test("custom individual paths use the shared overlay and positive flow animates outward", () => {
+    const rightTopIndividual = {
+      ...individualObj,
+      entity: "light.top",
+      field: { entity: "light.top" },
+      state: 1,
+    } as any;
+    const rightBottomIndividual = {
+      ...individualObj,
+      entity: "light.bottom",
+      field: { entity: "light.bottom" },
+      state: 74,
+    } as any;
+    const markup = templateToString(
+      flowElement(animatedConfig, {
+        ...baseFlows,
+        individual: [
+          { ...individualObj, entity: "light.left_top", field: { entity: "light.left_top" } },
+          { ...individualObj, entity: "light.left_bottom", field: { entity: "light.left_bottom" } },
+          rightTopIndividual,
+          rightBottomIndividual,
+        ],
         customTopologyHas: true,
       })
     );
 
-    expect(rightTopMarkup).toContain(`d=${customTopologyPath("home", "rightTopIndividual")}`);
-    expect(rightBottomMarkup).toContain(`d=${customTopologyPath("home", "rightBottomIndividual")}`);
-    expect(rightTopMarkup).toContain('class="individual-top custom-topology-dot"');
-    expect(rightTopMarkup).toContain('xlink:href="#individual-top-right-home"');
-    expect(rightTopMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
-    expect(rightBottomMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
+    expect(markup.match(/class="lines custom-topology-lines"/g) ?? []).toHaveLength(1);
+    expect(markup).toContain(`d="${customTopologyPath("home", "rightTopIndividual")}"`);
+    expect(markup).toContain(`d="${customTopologyPath("home", "rightBottomIndividual")}"`);
+    expect(markup).toContain('class="individual-top individual-right-top custom-topology-dot"');
+    expect(markup).toContain(
+      'class="individual-bottom individual-right-bottom custom-topology-dot"'
+    );
+    expect(markup).toContain('xlink:href="#individual-top-right-home"');
+    expect(markup).toContain('xlink:href="#individual-bottom-right-home"');
+    expect(markup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
     expect(customTopologyIndividualKeyPoints(true)).toBe("1;0");
   });
 

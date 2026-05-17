@@ -394,11 +394,14 @@ export const styles = css`
 
   .individual-right-top path,
   .individual-right-top circle,
-  .individual-right-top ellipse.individual-top {
+  .individual-right-top ellipse.individual-top,
+  path.individual-right-top,
+  ellipse.individual-right-top {
     stroke: var(--individual-right-top-color);
   }
 
-  .individual-right-top ellipse.individual-top {
+  .individual-right-top ellipse.individual-top,
+  ellipse.individual-right-top {
     fill: var(--individual-right-top-color);
   }
   .individual-right-bottom .circle {
@@ -411,11 +414,14 @@ export const styles = css`
 
   .individual-right-bottom path,
   .individual-right-bottom circle,
-  .individual-right-bottom ellipse.individual-bottom {
+  .individual-right-bottom ellipse.individual-bottom,
+  path.individual-right-bottom,
+  ellipse.individual-right-bottom {
     stroke: var(--individual-right-bottom-color);
   }
 
-  .individual-right-bottom ellipse.individual-bottom {
+  .individual-right-bottom ellipse.individual-bottom,
+  ellipse.individual-right-bottom {
     fill: var(--individual-right-bottom-color);
   }
 
