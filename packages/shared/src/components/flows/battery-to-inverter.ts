@@ -16,11 +16,7 @@ const batteryToInverterDot = (
 
   return svg`
     <circle r="1" class="battery-home" vector-effect="non-scaling-stroke">
-      <animateMotion
-        dur="${newDur.batteryToHome}s"
-        repeatCount="indefinite"
-        calcMode="paced"
-      >
+      <animateMotion dur="${newDur.batteryToHome}s" repeatCount="indefinite" calcMode="paced">
         <mpath xlink:href="#battery-inverter" />
       </animateMotion>
     </circle>
@@ -32,9 +28,7 @@ export const flowBatteryToInverter = (
   { battery, newDur }: FlowBatteryToInverterFlows
 ) => {
   const shouldShow =
-    battery.has &&
-    showLine(config, battery.state.toHome) &&
-    !config.entities.home?.hide;
+    battery.has && showLine(config, battery.state.toHome) && !config.entities.home?.hide;
 
   if (!shouldShow) return nothing;
 

@@ -109,6 +109,10 @@ interface Home extends BaseConfigEntity {
   hide?: boolean;
 }
 
+interface CustomTopologyEntity extends BaseConfigEntity {
+  entity: string;
+}
+
 interface FossilFuelPercentage extends BaseConfigEntity {
   entity: string;
   color?: string;
@@ -130,6 +134,9 @@ export type ConfigEntities = {
   solar?: Solar;
   home?: Home;
   fossil_fuel_percentage?: FossilFuelPercentage;
+  breaker?: CustomTopologyEntity;
+  inverter?: CustomTopologyEntity;
+  direct_loads?: CustomTopologyEntity;
   individual?: IndividualField;
   individual1?: IndividualField;
   individual2?: IndividualField;
@@ -141,4 +148,5 @@ export type ConfigEntity =
   | Solar
   | Home
   | FossilFuelPercentage
+  | CustomTopologyEntity
   | IndividualDeviceType;

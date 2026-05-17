@@ -16,11 +16,7 @@ const breakerToDirectLoadsDot = (
 
   return svg`
     <circle r="1" class="grid" vector-effect="non-scaling-stroke">
-      <animateMotion
-        dur="${newDur.gridToHome}s"
-        repeatCount="indefinite"
-        calcMode="paced"
-      >
+      <animateMotion dur="${newDur.gridToHome}s" repeatCount="indefinite" calcMode="paced">
         <mpath xlink:href="#breaker-direct-loads" />
       </animateMotion>
     </circle>
@@ -31,9 +27,7 @@ export const flowBreakerToDirectLoads = (
   config: FlowCardPlusConfig,
   { grid, newDur }: FlowBreakerToDirectLoadsFlows
 ) => {
-  const shouldShow =
-    grid.has &&
-    showLine(config, grid.state.fromGrid);
+  const shouldShow = grid.has && showLine(config, grid.state.fromGrid);
 
   if (!shouldShow) return nothing;
 

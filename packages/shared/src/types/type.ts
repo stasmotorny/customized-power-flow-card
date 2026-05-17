@@ -96,7 +96,10 @@ export type EntityType =
   | "individual1"
   | "individual2"
   | "home"
-  | "fossil_fuel_percentage";
+  | "fossil_fuel_percentage"
+  | "breaker"
+  | "inverter"
+  | "direct_loads";
 
 export type TemplatesObj = {
   gridSecondary: string | undefined;
