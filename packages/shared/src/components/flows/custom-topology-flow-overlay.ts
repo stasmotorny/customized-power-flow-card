@@ -7,7 +7,7 @@ import {
 } from "@flixlix-cards/shared/utils/compute-individual-position";
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
-import { html, nothing } from "lit";
+import { html, nothing, svg } from "lit";
 import { customTopologyDot } from "./custom-topology-dot";
 import { CUSTOM_TOPOLOGY_VIEW_BOX, customTopologyPath } from "./custom-topology-geometry";
 import { type Flows } from "./index";
@@ -32,7 +32,7 @@ const customTopologyFlowPath = (
 ) => {
   if (!showLine(config, value)) return nothing;
 
-  return html`
+  return svg`
     <path
       id="${pathId}"
       class="${`${className} ${styleLine(value, config)}`}"
@@ -95,114 +95,113 @@ export const customTopologyFlowOverlay = (
       ? undefined
       : newDur.individual?.[bottomRightIndex];
 
-  return html`
-    <div class="lines custom-topology-lines">
-      <svg
-        viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="none"
-        id="custom-topology-flow-overlay"
-      >
-        ${grid.has && homeVisible
-          ? html`
-              ${customTopologyFlowPath(config, {
-                className: "grid",
-                duration: newDur.gridToBreaker,
-                path: customTopologyPath("grid", "breaker"),
-                pathId: "grid-breaker",
-                value: flows.gridToBreaker,
-              })}
-              ${customTopologyFlowPath(config, {
-                className: "grid",
-                duration: newDur.breakerToInverter,
-                path: customTopologyPath("breaker", "inverter"),
-                pathId: "breaker-inverter",
-                value: flows.breakerToInverter,
-              })}
-              ${customTopologyFlowPath(config, {
-                className: "grid",
-                duration: newDur.inverterToHome,
-                path: customTopologyPath("inverter", "home"),
-                pathId: "inverter-home",
-                value: flows.inverterToHome,
-              })}
-            `
-          : nothing}
-        ${(directLoads?.has || flows.breakerToDirectLoads > 0) && homeVisible
-          ? customTopologyFlowPath(config, {
+  const overlay = svg`
+    <svg
+      viewBox="${CUSTOM_TOPOLOGY_VIEW_BOX}"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+      id="custom-topology-flow-overlay"
+      aria-hidden="true"
+    >
+      ${grid.has && homeVisible
+        ? svg`
+            ${customTopologyFlowPath(config, {
               className: "grid",
-              duration: newDur.directLoads,
-              path: customTopologyPath("breaker", "directLoads"),
-              pathId: "breaker-direct-loads",
-              value: flows.breakerToDirectLoads,
-            })
-          : nothing}
-        ${battery.has && homeVisible
-          ? customTopologyFlowPath(config, {
-              className: "battery-home",
-              duration: batteryInverterInverted
-                ? newDur.inverterToBattery
-                : newDur.batteryToInverter,
-              invertAnimation: batteryInverterInverted,
-              path: customTopologyPath("battery", "inverter"),
-              pathId: "battery-inverter",
-              value: batteryInverterValue,
-            })
-          : nothing}
-        ${solar.has && homeVisible
-          ? customTopologyFlowPath(config, {
-              className: "solar",
-              duration: newDur.solarToHome,
-              path: customTopologyPath("solar", "home"),
-              pathId: "solar",
-              value: solar.state.toHome || 0,
-            })
-          : nothing}
-        ${grid.has && grid.hasReturnToGrid && solar.has
-          ? customTopologyFlowPath(config, {
-              className: "return",
-              duration: newDur.solarToGrid,
-              path: customTopologyPath("solar", "grid"),
-              pathId: "return",
-              value: solar.state.toGrid || 0,
-            })
-          : nothing}
-        ${battery.has && solar.has
-          ? customTopologyFlowPath(config, {
-              className: "solar",
-              duration: newDur.solarToBattery,
-              path: customTopologyPath("solar", "battery"),
-              pathId: "solar-battery",
-              value: solar.state.toBattery || 0,
-            })
-          : nothing}
-        ${topRightIndividual && homeVisible
-          ? customTopologyFlowPath(config, {
-              className: "individual-top individual-right-top",
-              duration: computeIndividualFlowRate(
-                topRightIndividual.field?.calculate_flow_rate,
-                topRightDuration || 1.66
-              ),
-              invertAnimation: topRightIndividual.invertAnimation,
-              path: customTopologyPath("home", "rightTopIndividual"),
-              pathId: "individual-top-right-home",
-              value: topRightIndividual.state || 0,
-            })
-          : nothing}
-        ${bottomRightIndividual && homeVisible
-          ? customTopologyFlowPath(config, {
-              className: "individual-bottom individual-right-bottom",
-              duration: computeIndividualFlowRate(
-                bottomRightIndividual.field?.calculate_flow_rate,
-                bottomRightDuration || 1.66
-              ),
-              invertAnimation: bottomRightIndividual.invertAnimation,
-              path: customTopologyPath("home", "rightBottomIndividual"),
-              pathId: "individual-bottom-right-home",
-              value: bottomRightIndividual.state || 0,
-            })
-          : nothing}
-      </svg>
-    </div>
+              duration: newDur.gridToBreaker,
+              path: customTopologyPath("grid", "breaker"),
+              pathId: "grid-breaker",
+              value: flows.gridToBreaker,
+            })}
+            ${customTopologyFlowPath(config, {
+              className: "grid",
+              duration: newDur.breakerToInverter,
+              path: customTopologyPath("breaker", "inverter"),
+              pathId: "breaker-inverter",
+              value: flows.breakerToInverter,
+            })}
+            ${customTopologyFlowPath(config, {
+              className: "grid",
+              duration: newDur.inverterToHome,
+              path: customTopologyPath("inverter", "home"),
+              pathId: "inverter-home",
+              value: flows.inverterToHome,
+            })}
+          `
+        : nothing}
+      ${(directLoads?.has || flows.breakerToDirectLoads > 0) && homeVisible
+        ? customTopologyFlowPath(config, {
+            className: "grid",
+            duration: newDur.directLoads,
+            path: customTopologyPath("breaker", "directLoads"),
+            pathId: "breaker-direct-loads",
+            value: flows.breakerToDirectLoads,
+          })
+        : nothing}
+      ${battery.has && homeVisible
+        ? customTopologyFlowPath(config, {
+            className: "battery-home",
+            duration: batteryInverterInverted ? newDur.inverterToBattery : newDur.batteryToInverter,
+            invertAnimation: batteryInverterInverted,
+            path: customTopologyPath("battery", "inverter"),
+            pathId: "battery-inverter",
+            value: batteryInverterValue,
+          })
+        : nothing}
+      ${solar.has && homeVisible
+        ? customTopologyFlowPath(config, {
+            className: "solar",
+            duration: newDur.solarToHome,
+            path: customTopologyPath("solar", "home"),
+            pathId: "solar",
+            value: solar.state.toHome || 0,
+          })
+        : nothing}
+      ${grid.has && grid.hasReturnToGrid && solar.has
+        ? customTopologyFlowPath(config, {
+            className: "return",
+            duration: newDur.solarToGrid,
+            path: customTopologyPath("solar", "grid"),
+            pathId: "return",
+            value: solar.state.toGrid || 0,
+          })
+        : nothing}
+      ${battery.has && solar.has
+        ? customTopologyFlowPath(config, {
+            className: "solar",
+            duration: newDur.solarToBattery,
+            path: customTopologyPath("solar", "battery"),
+            pathId: "solar-battery",
+            value: solar.state.toBattery || 0,
+          })
+        : nothing}
+      ${topRightIndividual && homeVisible
+        ? customTopologyFlowPath(config, {
+            className: "individual-top individual-right-top",
+            duration: computeIndividualFlowRate(
+              topRightIndividual.field?.calculate_flow_rate,
+              topRightDuration || 1.66
+            ),
+            invertAnimation: topRightIndividual.invertAnimation,
+            path: customTopologyPath("home", "rightTopIndividual"),
+            pathId: "individual-top-right-home",
+            value: topRightIndividual.state || 0,
+          })
+        : nothing}
+      ${bottomRightIndividual && homeVisible
+        ? customTopologyFlowPath(config, {
+            className: "individual-bottom individual-right-bottom",
+            duration: computeIndividualFlowRate(
+              bottomRightIndividual.field?.calculate_flow_rate,
+              bottomRightDuration || 1.66
+            ),
+            invertAnimation: bottomRightIndividual.invertAnimation,
+            path: customTopologyPath("home", "rightBottomIndividual"),
+            pathId: "individual-bottom-right-home",
+            value: bottomRightIndividual.state || 0,
+          })
+        : nothing}
+    </svg>
   `;
+
+  return html`<div class="lines custom-topology-lines">${overlay}</div>`;
 };

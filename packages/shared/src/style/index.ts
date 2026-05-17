@@ -172,6 +172,7 @@ export const styles = css`
     margin-left: 0 !important;
     padding: 0;
     z-index: 0;
+    overflow: hidden;
   }
 
   .lines.custom-topology-lines svg {
@@ -182,7 +183,17 @@ export const styles = css`
     height: 100%;
   }
 
+  .lines.custom-topology-lines path {
+    display: inline;
+    visibility: visible;
+    opacity: 1;
+    stroke-width: 2;
+  }
+
   ellipse.custom-topology-dot {
+    display: inline;
+    visibility: visible;
+    opacity: 1;
     stroke-width: 4;
   }
 
@@ -495,12 +506,14 @@ export const styles = css`
     stroke: var(--energy-battery-out-color);
   }
   path.battery-home,
-  circle.battery-home {
-    stroke: var(--energy-battery-out-color);
+  circle.battery-home,
+  ellipse.battery-home {
+    stroke: var(--energy-battery-out-color, #f06292);
   }
-  circle.battery-home {
+  circle.battery-home,
+  ellipse.battery-home {
     stroke-width: 4;
-    fill: var(--energy-battery-out-color);
+    fill: var(--energy-battery-out-color, #f06292);
   }
   path.battery-solar,
   circle.battery-solar {
@@ -566,14 +579,14 @@ export const styles = css`
   circle.battery-from-grid,
   ellipse.battery-from-grid,
   path.grid {
-    stroke: var(--energy-grid-consumption-color);
+    stroke: var(--energy-grid-consumption-color, #488fc2);
   }
   circle.grid,
   ellipse.grid,
   circle.battery-from-grid,
   ellipse.battery-from-grid {
     stroke-width: 4;
-    fill: var(--energy-grid-consumption-color);
+    fill: var(--energy-grid-consumption-color, #488fc2);
   }
   .grid ha-icon:not(.small) {
     color: var(--icon-grid-color);

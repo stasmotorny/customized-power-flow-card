@@ -30,10 +30,13 @@ const hass = {
     "sensor.grid_0": { state: "0", attributes: { unit_of_measurement: "W" } },
     "sensor.solar": { state: "50", attributes: { unit_of_measurement: "W" } },
     "sensor.battery": { state: "20", attributes: { unit_of_measurement: "W" } },
+    "sensor.battery_3": { state: "3", attributes: { unit_of_measurement: "W" } },
+    "sensor.grid_161": { state: "161", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker": { state: "100", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter": { state: "70", attributes: { unit_of_measurement: "W" } },
     "sensor.direct_loads": { state: "30", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_221": { state: "221", attributes: { unit_of_measurement: "W" } },
+    "sensor.breaker_161": { state: "161", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter_9": { state: "9", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_215": { state: "215", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter_6": { state: "6", attributes: { unit_of_measurement: "W" } },
@@ -217,7 +220,7 @@ describe("render", () => {
     expect(markup).toContain('d="M87.5,170 V60"');
     expect(markup).toContain('xlink:href="#individual-top-right-home"');
     expect(markup).toContain('id="individual-bottom-right-home"');
-    expect(markup).toContain("viewBox=0 0 100 300");
+    expect(markup).toContain('viewBox="0 0 100 300"');
     expect(markup).toContain('d="M87.5,170 V280"');
     expect(markup).toContain('xlink:href="#individual-bottom-right-home"');
     expect(markup).not.toContain('id="individual-right-top-home-flow"');
@@ -248,6 +251,36 @@ describe("render", () => {
     expect(markup).toContain("74 W");
     expect(markup).toContain("75 W");
     expect(markup).not.toContain("<span>9 W</span>");
+  });
+
+  test("uses custom branch math for Home in measured custom topology instead of legacy standard totals", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      allow_layout_break: true,
+      entities: {
+        grid: { entity: "sensor.grid_161" },
+        battery: { entity: "sensor.battery_3" },
+        breaker: { entity: "sensor.breaker_161" },
+        inverter: { entity: "sensor.inverter_9" },
+        individual: [
+          { entity: "sensor.individual_0", name: "Left 1", display_zero: true },
+          { entity: "sensor.individual_0", name: "Left 2", display_zero: true },
+          { entity: "sensor.individual_0", name: "Right 1", display_zero: true },
+          { entity: "sensor.individual_1w", name: "Bottom right" },
+        ],
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('id="grid-breaker"');
+    expect(markup).toContain('id="breaker-inverter"');
+    expect(markup).toContain('id="inverter-home"');
+    expect(markup).toContain('id="breaker-direct-loads"');
+    expect(markup).toContain('id="battery-inverter"');
+    expect(markup).toContain("161 W");
+    expect(markup).toContain("152 W");
+    expect(markup).toContain("12 W");
+    expect(markup).not.toContain("158 W");
+    expect(markup).not.toContain("164 W");
   });
 
   test("preserves standard bottom-right individual flow geometry without custom topology", () => {

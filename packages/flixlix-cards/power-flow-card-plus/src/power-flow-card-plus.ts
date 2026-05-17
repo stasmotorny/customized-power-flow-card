@@ -782,8 +782,8 @@ export class PowerFlowCardPlus extends LitElement {
       breakerInput: breaker.state,
       inverterInput: inverter.state,
       directLoadsInput: useDirectLoadsEntityForCustomTopology ? directLoads.state : null,
-      batteryToHome: battery.state.toHome,
-      inverterToBattery: grid.state.toBattery,
+      batteryToHome: battery.state.fromBattery,
+      inverterToBattery: battery.state.toBattery,
     });
 
     if (customTopologyHas) {
@@ -929,15 +929,13 @@ export class PowerFlowCardPlus extends LitElement {
       (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0);
     const customTopologyHomeBranchConsumption =
       customTopologyFlows.inverterToHome + (solar.state.toHome ?? 0);
-    // Home remains the aggregate load node in custom topology mode. The raw
-    // Inverter → Home branch is useful for the custom path animation, but it
-    // must not redefine Home to be less than visible individual child loads.
-    const totalHomeConsumption = Math.max(
-      customTopologyHas ? customTopologyHomeBranchConsumption : standardHomeConsumption,
-      standardHomeConsumption,
-      totalIndividualConsumption,
-      0
-    );
+    // In custom topology mode Home is fed by the explicit Inverter → Home
+    // branch (plus Solar → Home), not by the legacy standard grid/battery
+    // aggregate. Keep only the visible-individual safeguard here so child loads
+    // cannot exceed the displayed Home value.
+    const totalHomeConsumption = customTopologyHas
+      ? Math.max(customTopologyHomeBranchConsumption, totalIndividualConsumption, 0)
+      : Math.max(standardHomeConsumption, totalIndividualConsumption, 0);
     const homeBatteryCircumference = battery.state.toHome
       ? CIRCLE_CIRCUMFERENCE * (battery.state.toHome / totalHomeConsumption)
       : 0;
