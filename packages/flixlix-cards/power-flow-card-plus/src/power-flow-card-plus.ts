@@ -402,6 +402,7 @@ export class PowerFlowCardPlus extends LitElement {
         unitWhiteSpace: field?.unit_white_space,
       });
     };
+    const layoutClass = customTopologyHas ? "custom-topology-layout" : "standard-layout";
 
     return html`
       <ha-card
@@ -420,7 +421,7 @@ export class PowerFlowCardPlus extends LitElement {
           directLoads.has ||
           individualObjs?.some((individual) => individual?.has) ||
           nonFossil.hasPercentage
-            ? html`<div class="row">
+            ? html`<div class="row ${layoutClass}">
                 ${nonFossilElement(this, this._config, {
                   entities,
                   grid,
@@ -445,7 +446,9 @@ export class PowerFlowCardPlus extends LitElement {
                         solar,
                         templatesObj,
                       })
-                    : spacer}
+                    : individualObjs?.some((individual) => individual?.has)
+                      ? spacer
+                      : nothing}
                 ${customTopologyHas
                   ? solar.has
                     ? solarElement(this, this._config, {
@@ -476,7 +479,7 @@ export class PowerFlowCardPlus extends LitElement {
                   : nothing}
               </div>`
             : nothing}
-          <div class="row">
+          <div class="row ${layoutClass}">
             ${grid.has
               ? gridElement(this, this._config, {
                   entities,
@@ -484,9 +487,8 @@ export class PowerFlowCardPlus extends LitElement {
                   templatesObj,
                 })
               : spacer}
-            <!--            ${spacer}-->
             ${customTopologyHas ? breakerElement(this, this._config, breaker) : spacer}
-            ${customTopologyHas ? inverterElement(this, this._config, inverter) : spacer}
+            ${customTopologyHas ? inverterElement(this, this._config, inverter) : nothing}
             ${!entities.home?.hide
               ? homeElement(this, this._config, {
                   CIRCLE_CIRCUMFERENCE,
@@ -506,8 +508,8 @@ export class PowerFlowCardPlus extends LitElement {
             ${checkHasRightIndividual(individualObjs) ? spacer : nothing}
           </div>
           ${battery.has || checkHasBottomIndividual(individualObjs)
-            ? html`<div class="row">
-                ${spacer} ${spacer}
+            ? html`<div class="row ${layoutClass}">
+                ${spacer} ${customTopologyHas ? spacer : nothing}
                 ${battery.has ? batteryElement(this, this._config, { battery, entities }) : spacer}
                 ${individualFieldLeftBottom
                   ? individualLeftBottomElement(this, this._config, {
