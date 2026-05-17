@@ -27,6 +27,7 @@ const hass = {
   localize: (key: string) => key,
   states: {
     "sensor.grid": { state: "100", attributes: { unit_of_measurement: "W" } },
+    "sensor.grid_0": { state: "0", attributes: { unit_of_measurement: "W" } },
     "sensor.solar": { state: "50", attributes: { unit_of_measurement: "W" } },
     "sensor.battery": { state: "20", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker": { state: "100", attributes: { unit_of_measurement: "W" } },
@@ -41,6 +42,9 @@ const hass = {
     "sensor.individual_2": { state: "20", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_3": { state: "30", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_4": { state: "40", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_0": { state: "0", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_1w": { state: "1", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_74w": { state: "74", attributes: { unit_of_measurement: "W" } },
   },
   locale: {},
   config: {},
@@ -207,16 +211,43 @@ describe("render", () => {
     } as PowerFlowCardPlusConfig);
 
     expect(markup).toContain('class="row custom-topology-layout"');
-    expect(markup).toContain('class="lines custom-topology-lines individual-right-top-flow"');
-    expect(markup).toContain('id="individual-right-top-home-flow"');
+    expect(markup.match(/class="lines custom-topology-lines"/g) ?? []).toHaveLength(1);
+    expect(markup).toContain('id="custom-topology-flow-overlay"');
     expect(markup).toContain('id="individual-top-right-home"');
-    expect(markup).toContain("d=M87.5,170 V60");
-    expect(markup).toContain('class="lines custom-topology-lines individual-right-bottom-flow"');
-    expect(markup).toContain('id="individual-right-bottom-home-flow"');
+    expect(markup).toContain('d="M87.5,170 V60"');
+    expect(markup).toContain('xlink:href="#individual-top-right-home"');
     expect(markup).toContain('id="individual-bottom-right-home"');
     expect(markup).toContain("viewBox=0 0 100 300");
-    expect(markup).toContain("d=M87.5,170 V280");
+    expect(markup).toContain('d="M87.5,170 V280"');
+    expect(markup).toContain('xlink:href="#individual-bottom-right-home"');
+    expect(markup).not.toContain('id="individual-right-top-home-flow"');
+    expect(markup).not.toContain('id="individual-right-bottom-home-flow"');
     expect(markup).not.toContain('d="M45,100 v-15 c0,-30 -10,-30 -30,-30 h-20"');
+  });
+
+  test("keeps custom topology Home display at least as large as visible child loads", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      allow_layout_break: true,
+      entities: {
+        grid: { entity: "sensor.grid_0" },
+        breaker: { entity: "sensor.breaker_221" },
+        inverter: { entity: "sensor.inverter_9" },
+        individual: [
+          { entity: "sensor.individual_0", name: "Left 1", display_zero: true },
+          { entity: "sensor.individual_0", name: "Left 2", display_zero: true },
+          { entity: "sensor.individual_1w", name: "Св вітальня" },
+          { entity: "sensor.individual_74w", name: "Холодильник" },
+        ],
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('id="individual-top-right-home"');
+    expect(markup).toContain('id="individual-bottom-right-home"');
+    expect(markup).toContain("1 W");
+    expect(markup).toContain("74 W");
+    expect(markup).toContain("75 W");
+    expect(markup).not.toContain("<span>9 W</span>");
   });
 
   test("preserves standard bottom-right individual flow geometry without custom topology", () => {

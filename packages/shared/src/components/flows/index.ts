@@ -4,10 +4,8 @@ import { type CustomTopologyPowerFlows } from "@flixlix-cards/shared/utils/compu
 import { html } from "lit";
 import { flowBatteryToGrid } from "./battery-to-grid";
 import { flowBatteryToHome } from "./battery-to-home";
-import { flowBatteryToInverter } from "./battery-to-inverter";
-import { flowBreakerToDirectLoads } from "./breaker-to-direct-loads";
+import { customTopologyFlowOverlay } from "./custom-topology-flow-overlay";
 import { flowGridToHome } from "./grid-to-home";
-import { flowGridViaBreakerInverter } from "./grid-via-breaker-inverter";
 import { flowSolarToGrid } from "./solar-to-grid";
 import { flowSolarToHome } from "./solar-to-home";
 import { flowSolarToBattery } from "./solart-to-battery";
@@ -36,19 +34,23 @@ export const flowElement = (
     newDur,
   }: Flows
 ) => {
+  if (customTopologyHas) {
+    return customTopologyFlowOverlay(config, {
+      battery,
+      customTopologyFlows,
+      directLoads,
+      grid,
+      individual,
+      newDur,
+      solar,
+    });
+  }
+
   const solarFlows = html`
     ${flowSolarToHome(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
     ${flowSolarToGrid(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
     ${flowSolarToBattery(config, { battery, individual, solar, customTopologyHas, newDur })}
   `;
-
-  if (customTopologyHas) {
-    return html`
-      ${solarFlows} ${flowGridViaBreakerInverter(config, { customTopologyFlows, grid, newDur })}
-      ${flowBatteryToInverter(config, { battery, customTopologyFlows, newDur })}
-      ${flowBreakerToDirectLoads(config, { customTopologyFlows, directLoads, newDur })}
-    `;
-  }
 
   return html`
     ${solarFlows} ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}

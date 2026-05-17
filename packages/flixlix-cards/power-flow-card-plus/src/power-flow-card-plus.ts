@@ -925,10 +925,17 @@ export class PowerFlowCardPlus extends LitElement {
     }
     const totalIndividualConsumption =
       individualObjs?.reduce((a, b) => a + (b.has ? b.state || 0 : 0), 0) || 0;
+    const standardHomeConsumption =
+      (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0);
+    const customTopologyHomeBranchConsumption =
+      customTopologyFlows.inverterToHome + (solar.state.toHome ?? 0);
+    // Home remains the aggregate load node in custom topology mode. The raw
+    // Inverter → Home branch is useful for the custom path animation, but it
+    // must not redefine Home to be less than visible individual child loads.
     const totalHomeConsumption = Math.max(
-      customTopologyHas
-        ? customTopologyFlows.inverterToHome + (solar.state.toHome ?? 0)
-        : (grid.state.toHome ?? 0) + (solar.state.toHome ?? 0) + (battery.state.toHome ?? 0),
+      customTopologyHas ? customTopologyHomeBranchConsumption : standardHomeConsumption,
+      standardHomeConsumption,
+      totalIndividualConsumption,
       0
     );
     const homeBatteryCircumference = battery.state.toHome
