@@ -34,6 +34,9 @@ const hass = {
     "sensor.direct_loads": { state: "30", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_221": { state: "221", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter_9": { state: "9", attributes: { unit_of_measurement: "W" } },
+    "sensor.breaker_215": { state: "215", attributes: { unit_of_measurement: "W" } },
+    "sensor.inverter_6": { state: "6", attributes: { unit_of_measurement: "W" } },
+    "sensor.direct_loads_0": { state: "0", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_1": { state: "10", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_2": { state: "20", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_3": { state: "30", attributes: { unit_of_measurement: "W" } },
@@ -139,6 +142,48 @@ describe("render", () => {
     expect(markup).toContain("9 W");
     expect(markup).toContain("212 W");
     expect(markup).toContain('class="circle-container individual-top"');
+  });
+
+  test("keeps measured breaker and inverter states while deriving default direct loads", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      entities: {
+        grid: { entity: "sensor.grid" },
+        breaker: { entity: "sensor.breaker_215" },
+        inverter: { entity: "sensor.inverter_6" },
+        direct_loads: { entity: "sensor.direct_loads_0" },
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain("215 W");
+    expect(markup).toContain("6 W");
+    expect(markup).toContain("209 W");
+    expect(markup).toContain('id="grid-breaker"');
+    expect(markup).toContain('d="M12.5,170 H37.5"');
+    expect(markup).toContain('id="breaker-inverter"');
+    expect(markup).toContain('d="M37.5,170 H62.5"');
+    expect(markup).toContain('id="inverter-home"');
+    expect(markup).toContain('d="M62.5,170 H87.5"');
+  });
+
+  test("allows direct loads entity to be authoritative only when explicitly opted in", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      entities: {
+        grid: { entity: "sensor.grid" },
+        breaker: { entity: "sensor.breaker_215" },
+        inverter: { entity: "sensor.inverter_6" },
+        direct_loads: {
+          entity: "sensor.direct_loads_0",
+          use_entity_state_for_custom_topology: true,
+        },
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain("215 W");
+    expect(markup).toContain("6 W");
+    expect(markup).not.toContain("209 W");
   });
 
   test("routes custom topology bottom-right individual flow through the shared custom overlay", () => {

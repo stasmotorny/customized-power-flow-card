@@ -23,13 +23,15 @@ const positive = (value?: number | null) => Math.max(value ?? 0, 0);
  * and Battery connected to the inverter.
  *
  * Balancing policy:
- * - When directLoadsInput is configured, explicit branch values win and the
- *   breaker/grid incoming value is derived from breakerToInverter + directLoads.
- * - When directLoadsInput is missing, direct loads are derived from the measured
- *   breaker input minus the measured inverter branch: max(breaker - inverter, 0).
+ * - By default, callers should omit directLoadsInput so direct loads are derived
+ *   from the measured breaker input minus the measured inverter branch:
+ *   max(breaker - inverter, 0).
+ * - If a caller explicitly opts into using a direct-load entity as authoritative,
+ *   directLoadsInput can be supplied and gridToBreaker is balanced from
+ *   breakerToInverter + directLoads.
  *
- * This keeps the rendered topology internally consistent and prevents impossible
- * displays such as Breaker 221 W, Inverter 9 W, Direct loads 0 W.
+ * Node display state is intentionally kept outside this helper so measured
+ * Breaker/Inverter entities are not overwritten by branch balancing.
  */
 export const computeCustomTopologyPowerFlows = ({
   breakerInput,

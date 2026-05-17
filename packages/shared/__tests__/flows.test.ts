@@ -167,7 +167,7 @@ describe("flowElement", () => {
     );
   });
 
-  test("computes balanced custom topology power flows", () => {
+  test("computes default custom topology direct loads from measured breaker minus inverter", () => {
     const derived = computeCustomTopologyPowerFlows({
       breakerInput: 221,
       inverterInput: 9,
@@ -178,7 +178,9 @@ describe("flowElement", () => {
     expect(derived.breakerToDirectLoads).toBe(212);
     expect(derived.gridToBreaker).toBe(221);
     expect(derived.gridToBreaker).toBe(derived.breakerToInverter + derived.breakerToDirectLoads);
+  });
 
+  test("supports explicit direct-load branch balancing for opt-in callers", () => {
     const explicitBranchesWin = computeCustomTopologyPowerFlows({
       breakerInput: 221,
       inverterInput: 9,
@@ -255,6 +257,47 @@ describe("flowElement", () => {
     expect(markup).toContain('class="grid custom-topology-dot"');
   });
 
+  test("renders positive horizontal custom topology paths with path-local ids and dots", () => {
+    const markup = templateToString(
+      flowElement(animatedConfig, {
+        ...baseFlows,
+        customTopologyHas: true,
+        customTopologyFlows: {
+          gridToBreaker: 215,
+          breakerToInverter: 6,
+          breakerToDirectLoads: 209,
+          inverterToHome: 6,
+          batteryToInverter: 0,
+          inverterToBattery: 0,
+        },
+      })
+    );
+
+    expect(markup).toContain('id="grid-breaker"');
+    expect(markup).toContain('class="grid ');
+    expect(markup).toContain('d="M12.5,170 H37.5"');
+    expect(markup).toContain('xlink:href="#grid-breaker"');
+    expect(markup).toContain('id="breaker-inverter"');
+    expect(markup).toContain('d="M37.5,170 H62.5"');
+    expect(markup).toContain('xlink:href="#breaker-inverter"');
+    expect(markup).toContain('id="inverter-home"');
+    expect(markup).toContain('d="M62.5,170 H87.5"');
+    expect(markup).toContain('xlink:href="#inverter-home"');
+  });
+
+  test("styles ellipse custom topology dots with flow-specific colors", () => {
+    const cssText = (styles as unknown as { cssText: string }).cssText;
+
+    expect(cssText).toContain("ellipse.custom-topology-dot");
+    expect(cssText).toContain("ellipse.grid");
+    expect(cssText).toContain("ellipse.solar");
+    expect(cssText).toContain("ellipse.battery");
+    expect(cssText).toContain("ellipse.individual-top");
+    expect(cssText).toContain("ellipse.individual-bottom");
+    expect(cssText).toContain(".individual-right-top ellipse.individual-top");
+    expect(cssText).toContain(".individual-right-bottom ellipse.individual-bottom");
+  });
+
   test("custom topology dot rendering uses compensated ellipses instead of distorted circles", () => {
     const dot = templateToString(
       customTopologyDot({ className: "grid", duration: 2, pathId: "grid-breaker" })
@@ -314,6 +357,8 @@ describe("flowElement", () => {
 
     expect(rightTopMarkup).toContain(`d=${customTopologyPath("home", "rightTopIndividual")}`);
     expect(rightBottomMarkup).toContain(`d=${customTopologyPath("home", "rightBottomIndividual")}`);
+    expect(rightTopMarkup).toContain('class="individual-top custom-topology-dot"');
+    expect(rightTopMarkup).toContain('xlink:href="#individual-top-right-home"');
     expect(rightTopMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
     expect(rightBottomMarkup).toContain(`keyPoints="${customTopologyIndividualKeyPoints(false)}"`);
     expect(customTopologyIndividualKeyPoints(true)).toBe("1;0");
@@ -323,6 +368,8 @@ describe("flowElement", () => {
     const cssText = (styles as unknown as { cssText: string }).cssText;
 
     expect(cssText).toContain(".lines.custom-topology-lines");
+    expect(cssText).toContain(".lines.custom-topology-lines svg");
+    expect(cssText).toContain("left: 0 !important");
     expect(cssText).toContain("width: 100%");
     expect(cssText).not.toContain(
       ".lines.custom-topology-lines {\n    top: 0;\n    bottom: auto;\n    left: 0;\n    width: calc(var(--size-circle-entity) * 4)"

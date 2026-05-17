@@ -174,6 +174,18 @@ export const styles = css`
     z-index: 0;
   }
 
+  .lines.custom-topology-lines svg {
+    left: 0 !important;
+    top: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+  }
+
+  ellipse.custom-topology-dot {
+    stroke-width: 4;
+  }
+
   .card-content.no-labels .lines.custom-topology-lines {
     transform: none;
   }
@@ -326,7 +338,8 @@ export const styles = css`
   }
 
   .individual-top path,
-  .individual-top circle {
+  .individual-top circle,
+  ellipse.individual-top {
     stroke: var(--individual-left-top-color);
   }
 
@@ -347,12 +360,14 @@ export const styles = css`
   #solar-icon {
     color: var(--icon-solar-color);
   }
-  circle.individual-top {
+  circle.individual-top,
+  ellipse.individual-top {
     stroke-width: 4;
     width: var(--dot-size);
     fill: var(--individual-left-top-color);
   }
-  circle.individual-bottom {
+  circle.individual-bottom,
+  ellipse.individual-bottom {
     stroke-width: 4;
     width: var(--dot-size);
     fill: var(--individual-left-bottom-color);
@@ -361,7 +376,8 @@ export const styles = css`
     border-color: var(--individual-left-top-color);
   }
   .individual-bottom path,
-  .individual-bottom circle {
+  .individual-bottom circle,
+  ellipse.individual-bottom {
     stroke: var(--individual-left-bottom-color);
   }
   .individual-bottom .circle {
@@ -377,8 +393,13 @@ export const styles = css`
   }
 
   .individual-right-top path,
-  .individual-right-top circle {
+  .individual-right-top circle,
+  .individual-right-top ellipse.individual-top {
     stroke: var(--individual-right-top-color);
+  }
+
+  .individual-right-top ellipse.individual-top {
+    fill: var(--individual-right-top-color);
   }
   .individual-right-bottom .circle {
     border-color: var(--individual-right-bottom-color);
@@ -389,8 +410,13 @@ export const styles = css`
   }
 
   .individual-right-bottom path,
-  .individual-right-bottom circle {
+  .individual-right-bottom circle,
+  .individual-right-bottom ellipse.individual-bottom {
     stroke: var(--individual-right-bottom-color);
+  }
+
+  .individual-right-bottom ellipse.individual-bottom {
+    fill: var(--individual-right-bottom-color);
   }
 
   .right-individual-flow-container {
@@ -445,10 +471,12 @@ export const styles = css`
     color: var(--icon-solar-color);
   }
   circle.solar,
+  ellipse.solar,
   path.solar {
     stroke: var(--energy-solar-color);
   }
-  circle.solar {
+  circle.solar,
+  ellipse.solar {
     stroke-width: 4;
     fill: var(--energy-solar-color);
   }
@@ -456,6 +484,7 @@ export const styles = css`
     border-color: var(--circle-battery-color);
   }
   circle.battery,
+  ellipse.battery,
   path.battery {
     stroke: var(--energy-battery-out-color);
   }
@@ -499,11 +528,15 @@ export const styles = css`
 
   path.return,
   circle.return,
-  circle.battery-to-grid {
+  ellipse.return,
+  circle.battery-to-grid,
+  ellipse.battery-to-grid {
     stroke: var(--energy-grid-return-color);
   }
   circle.return,
-  circle.battery-to-grid {
+  ellipse.return,
+  circle.battery-to-grid,
+  ellipse.battery-to-grid {
     stroke-width: 4;
     fill: var(--energy-grid-return-color);
   }
@@ -523,12 +556,16 @@ export const styles = css`
     color: var(--text-grid-consumption-color);
   }
   circle.grid,
+  ellipse.grid,
   circle.battery-from-grid,
+  ellipse.battery-from-grid,
   path.grid {
     stroke: var(--energy-grid-consumption-color);
   }
   circle.grid,
-  circle.battery-from-grid {
+  ellipse.grid,
+  circle.battery-from-grid,
+  ellipse.battery-from-grid {
     stroke-width: 4;
     fill: var(--energy-grid-consumption-color);
   }
