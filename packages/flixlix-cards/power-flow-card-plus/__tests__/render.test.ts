@@ -31,13 +31,17 @@ const hass = {
     "sensor.solar": { state: "50", attributes: { unit_of_measurement: "W" } },
     "sensor.battery": { state: "20", attributes: { unit_of_measurement: "W" } },
     "sensor.battery_3": { state: "3", attributes: { unit_of_measurement: "W" } },
+    "sensor.grid_1600": { state: "1600", attributes: { unit_of_measurement: "W" } },
+    "sensor.home_1400": { state: "1400", attributes: { unit_of_measurement: "W" } },
     "sensor.grid_161": { state: "161", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker": { state: "100", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter": { state: "70", attributes: { unit_of_measurement: "W" } },
     "sensor.direct_loads": { state: "30", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_221": { state: "221", attributes: { unit_of_measurement: "W" } },
+    "sensor.breaker_1600": { state: "1600", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_161": { state: "161", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter_9": { state: "9", attributes: { unit_of_measurement: "W" } },
+    "sensor.inverter_10": { state: "10", attributes: { unit_of_measurement: "W" } },
     "sensor.breaker_215": { state: "215", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter_6": { state: "6", attributes: { unit_of_measurement: "W" } },
     "sensor.direct_loads_0": { state: "0", attributes: { unit_of_measurement: "W" } },
@@ -47,6 +51,8 @@ const hass = {
     "sensor.individual_4": { state: "40", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_0": { state: "0", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_1w": { state: "1", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_11w": { state: "11", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_700w": { state: "700", attributes: { unit_of_measurement: "W" } },
     "sensor.individual_74w": { state: "74", attributes: { unit_of_measurement: "W" } },
   },
   locale: {},
@@ -110,7 +116,7 @@ describe("render", () => {
     expect(middleRow.match(/class="circle-container grid"/g) ?? []).toHaveLength(1);
   });
 
-  test("uses the custom topology grid layout and middle row structure when configured", () => {
+  test("uses the custom topology stage layout when configured", () => {
     const markup = renderCard({
       type: "custom:power-flow-card-plus",
       entities: {
@@ -122,15 +128,16 @@ describe("render", () => {
         direct_loads: { entity: "sensor.direct_loads" },
       },
     } as PowerFlowCardPlusConfig);
-    const middleRow = getMiddleRowMarkup(markup, "custom-topology-layout");
-
-    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('class="custom-topology-stage"');
+    expect(markup).toContain('class="custom-topology-node custom-topology-node-grid"');
+    expect(markup).toContain('class="custom-topology-node custom-topology-node-breaker"');
+    expect(markup).toContain('class="custom-topology-node custom-topology-node-inverter"');
+    expect(markup).toContain('class="custom-topology-node custom-topology-node-home"');
+    expect(markup).not.toContain('class="row custom-topology-layout"');
     expect(markup).not.toContain('class="row standard-layout"');
-    expect(middleRow.match(/class="circle-container grid"/g) ?? []).toHaveLength(2);
-    expect(middleRow).toContain('id="grid-icon"');
-    expect(middleRow).toContain('class="circle-container battery inverter"');
-    expect(middleRow).toContain('id="home-circle"');
-    expect(middleRow.match(/class="spacer"/g) ?? []).toHaveLength(0);
+    expect(markup).toContain('id="grid-icon"');
+    expect(markup).toContain('class="circle-container battery inverter"');
+    expect(markup).toContain('id="home-circle"');
   });
   test("derives custom topology direct loads and renders balanced node values", () => {
     const markup = renderCard({
@@ -144,7 +151,7 @@ describe("render", () => {
       },
     } as PowerFlowCardPlusConfig);
 
-    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('class="custom-topology-stage"');
     expect(markup).toContain("221 W");
     expect(markup).toContain("9 W");
     expect(markup).toContain("212 W");
@@ -162,7 +169,7 @@ describe("render", () => {
       },
     } as PowerFlowCardPlusConfig);
 
-    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('class="custom-topology-stage"');
     expect(markup).toContain("215 W");
     expect(markup).toContain("6 W");
     expect(markup).toContain("209 W");
@@ -213,14 +220,14 @@ describe("render", () => {
       },
     } as PowerFlowCardPlusConfig);
 
-    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('class="custom-topology-stage"');
     expect(markup.match(/class="lines custom-topology-lines"/g) ?? []).toHaveLength(1);
     expect(markup).toContain('id="custom-topology-flow-overlay"');
     expect(markup).toContain('id="individual-top-right-home"');
     expect(markup).toContain('d="M87.5,170 V60"');
     expect(markup).toContain('xlink:href="#individual-top-right-home"');
     expect(markup).toContain('id="individual-bottom-right-home"');
-    expect(markup).toContain('viewBox="0 0 100 300"');
+    expect(markup).toContain('viewBox="0 0 100 340"');
     expect(markup).toContain('d="M87.5,170 V280"');
     expect(markup).toContain('xlink:href="#individual-bottom-right-home"');
     expect(markup).not.toContain('id="individual-right-top-home-flow"');
@@ -281,6 +288,52 @@ describe("render", () => {
     expect(markup).toContain("12 W");
     expect(markup).not.toContain("158 W");
     expect(markup).not.toContain("164 W");
+  });
+
+  test("renders screenshot-regression custom Home math from visible branch loads, not Home entity", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      allow_layout_break: true,
+      entities: {
+        grid: { entity: "sensor.grid_1600" },
+        home: { entity: "sensor.home_1400" },
+        battery: { entity: "sensor.battery_3" },
+        breaker: { entity: "sensor.breaker_1600" },
+        inverter: { entity: "sensor.inverter_10" },
+        individual: [
+          { entity: "sensor.individual_0", name: "Left 1", display_zero: true },
+          { entity: "sensor.individual_0", name: "Left 2", display_zero: true },
+          { entity: "sensor.individual_1w", name: "Св вітальня" },
+          { entity: "sensor.individual_11w", name: "Сервер" },
+          { entity: "sensor.individual_700w", name: "Hidden legacy load 1" },
+          { entity: "sensor.individual_700w", name: "Hidden legacy load 2" },
+        ],
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain("1.6 kW");
+    expect(markup).toContain('id="breaker-direct-loads"');
+    expect(markup).toContain("10 W");
+    expect(markup).toContain("3 W");
+    expect(markup).toContain("1 W");
+    expect(markup).toContain("11 W");
+    expect(markup).toContain("13 W");
+    expect(markup).not.toContain("1.4 kW");
+  });
+
+  test("allows custom topology Home entity display only with explicit override_state", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      entities: {
+        grid: { entity: "sensor.grid_1600" },
+        home: { entity: "sensor.home_1400", override_state: true },
+        battery: { entity: "sensor.battery_3" },
+        breaker: { entity: "sensor.breaker_1600" },
+        inverter: { entity: "sensor.inverter_10" },
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain("1.4 kW");
   });
 
   test("preserves standard bottom-right individual flow geometry without custom topology", () => {

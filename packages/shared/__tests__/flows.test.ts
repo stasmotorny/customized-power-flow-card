@@ -361,26 +361,26 @@ describe("flowElement", () => {
     expect(customTopologyIndividualKeyPoints(true)).toBe("1;0");
   });
 
-  test("keeps custom topology rows and SVG overlay in the same horizontal coordinate system", () => {
+  test("keeps custom topology stage nodes and SVG overlay in the same coordinate system", () => {
     const cssText = (styles as unknown as { cssText: string }).cssText;
 
+    expect(cssText).toContain(".custom-topology-stage");
+    expect(cssText).toContain("position: relative");
+    expect(cssText).toContain("height: 340px");
+    expect(cssText).toContain(".custom-topology-node");
+    expect(cssText).toContain("left: calc(var(--custom-topology-x) * 1%)");
+    expect(cssText).toContain("top: calc(var(--custom-topology-y) * 1px)");
+    expect(cssText).toContain("transform: translate(-50%, -40px)");
+    expect(cssText).toContain(".custom-topology-node-rightTopIndividual");
+    expect(cssText).toContain("transform: translate(-50%, -60px)");
     expect(cssText).toContain(".lines.custom-topology-lines");
+    expect(cssText).toContain("inset: 0");
+    expect(cssText).toContain("height: 100%");
     expect(cssText).toContain(".lines.custom-topology-lines svg");
-    expect(cssText).toContain("left: 0 !important");
     expect(cssText).toContain("width: 100%");
-    expect(cssText).not.toContain(
-      ".lines.custom-topology-lines {\n    top: 0;\n    bottom: auto;\n    left: 0;\n    width: calc(var(--size-circle-entity) * 4)"
-    );
-    expect(cssText).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
-    expect(cssText).toContain("justify-content: stretch");
-    expect(cssText).toContain("justify-items: center");
-    expect(cssText).toContain(".circle-container.battery.inverter");
-    expect(cssText).toContain("height: auto");
-    expect(cssText).toContain("justify-content: flex-start");
-    expect(cssText).toContain(".row.custom-topology-layout .circle");
+    expect(cssText).toContain(".custom-topology-stage .circle");
     expect(cssText).toContain("--ha-card-background");
     expect(cssText).toContain("z-index: 1");
-    expect(cssText).toContain(".lines.custom-topology-lines");
     expect(cssText).toContain("z-index: 0");
   });
 });

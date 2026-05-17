@@ -162,12 +162,53 @@ export const styles = css`
     top: var(--lines-svg-not-flat-line-top);
   }
 
+  .custom-topology-stage {
+    position: relative;
+    max-width: 500px;
+    height: 340px;
+    margin: 0 auto;
+  }
+
+  .custom-topology-node {
+    position: absolute;
+    left: calc(var(--custom-topology-x) * 1%);
+    top: calc(var(--custom-topology-y) * 1px);
+    transform: translate(-50%, -40px);
+    z-index: 1;
+  }
+
+  .custom-topology-node-rightTopIndividual {
+    transform: translate(-50%, -60px);
+  }
+
+  .card-content.no-labels .custom-topology-node-rightTopIndividual {
+    transform: translate(-50%, -40px);
+  }
+
+  .custom-topology-stage .circle-container.solar,
+  .custom-topology-stage .circle-container.individual-top,
+  .custom-topology-stage .circle-container.individual-bottom,
+  .custom-topology-stage .circle-container.individual-bottom.bottom,
+  .custom-topology-stage .circle-container.battery,
+  .custom-topology-stage .circle-container.battery.inverter {
+    height: auto;
+    justify-content: flex-start;
+    top: auto;
+    margin-bottom: 0;
+  }
+
+  .custom-topology-stage .circle {
+    background: var(
+      --ha-card-background,
+      var(--card-background-color, var(--primary-background-color))
+    );
+  }
+
   .lines.custom-topology-lines {
-    top: 0;
-    bottom: auto;
-    left: 0;
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: 300px;
+    height: 100%;
     display: block;
     margin-left: 0 !important;
     padding: 0;

@@ -1,4 +1,4 @@
-export const CUSTOM_TOPOLOGY_VIEW_BOX = "0 0 100 300";
+export const CUSTOM_TOPOLOGY_VIEW_BOX = "0 0 100 340";
 
 type CustomTopologyPoint = Readonly<{
   x: number;
