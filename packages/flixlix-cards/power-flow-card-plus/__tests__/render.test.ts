@@ -32,6 +32,10 @@ const hass = {
     "sensor.breaker": { state: "100", attributes: { unit_of_measurement: "W" } },
     "sensor.inverter": { state: "70", attributes: { unit_of_measurement: "W" } },
     "sensor.direct_loads": { state: "30", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_1": { state: "10", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_2": { state: "20", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_3": { state: "30", attributes: { unit_of_measurement: "W" } },
+    "sensor.individual_4": { state: "40", attributes: { unit_of_measurement: "W" } },
   },
   locale: {},
   config: {},
@@ -115,5 +119,54 @@ describe("render", () => {
     expect(middleRow).toContain('class="circle-container battery inverter"');
     expect(middleRow).toContain('id="home-circle"');
     expect(middleRow.match(/class="spacer"/g) ?? []).toHaveLength(0);
+  });
+  test("routes custom topology bottom-right individual flow inline instead of absolute standard geometry", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      allow_layout_break: true,
+      entities: {
+        grid: { entity: "sensor.grid" },
+        solar: { entity: "sensor.solar" },
+        battery: { entity: "sensor.battery" },
+        breaker: { entity: "sensor.breaker" },
+        inverter: { entity: "sensor.inverter" },
+        direct_loads: { entity: "sensor.direct_loads" },
+        individual: [
+          { entity: "sensor.individual_1", name: "Individual 1" },
+          { entity: "sensor.individual_2", name: "Individual 2" },
+          { entity: "sensor.individual_3", name: "Individual 3" },
+          { entity: "sensor.individual_4", name: "Сервер" },
+        ],
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('class="row custom-topology-layout"');
+    expect(markup).toContain('id="individual-bottom-right-home"');
+    expect(markup).toContain('d="M40 40 v-40"');
+    expect(markup).not.toContain('class="right-individual-flow-container"');
+    expect(markup).not.toContain('d="M45,100 v-15 c0,-30 -10,-30 -30,-30 h-20"');
+  });
+
+  test("preserves standard bottom-right individual flow geometry without custom topology", () => {
+    const markup = renderCard({
+      type: "custom:power-flow-card-plus",
+      allow_layout_break: true,
+      entities: {
+        grid: { entity: "sensor.grid" },
+        solar: { entity: "sensor.solar" },
+        battery: { entity: "sensor.battery" },
+        individual: [
+          { entity: "sensor.individual_1", name: "Individual 1" },
+          { entity: "sensor.individual_2", name: "Individual 2" },
+          { entity: "sensor.individual_3", name: "Individual 3" },
+          { entity: "sensor.individual_4", name: "Сервер" },
+        ],
+      },
+    } as PowerFlowCardPlusConfig);
+
+    expect(markup).toContain('class="row standard-layout"');
+    expect(markup).toContain('class="right-individual-flow-container"');
+    expect(markup).toContain('id="individual-bottom-right-home"');
+    expect(markup).toContain('d="M45,100 v-15 c0,-30 -10,-30 -30,-30 h-20"');
   });
 });

@@ -21,12 +21,21 @@ interface TopIndividual {
   displayState: string;
   battery: any;
   individualObjs: IndividualObject[];
+  customTopologyHas?: boolean;
 }
 
 export const individualRightTopElement = (
   main: CardMainContext,
   config: FlowCardPlusConfig,
-  { individualObj, templatesObj, displayState, newDur, battery, individualObjs }: TopIndividual
+  {
+    individualObj,
+    templatesObj,
+    displayState,
+    newDur,
+    battery,
+    individualObjs,
+    customTopologyHas,
+  }: TopIndividual
 ) => {
   if (!individualObj) return spacer;
   const disableEntityClick = config.clickable_entities === false;
@@ -91,26 +100,19 @@ export const individualRightTopElement = (
         : nothing}
     </div>
     ${showLine(config, individualObj.state || 0) && !config.entities.home?.hide
-      ? html`
-          <div class="right-individual-flow-container">
-            <svg
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="xMidYMid slice"
-              class="right-individual-flow"
-            >
+      ? customTopologyHas
+        ? html`
+            <svg width="80" height="30">
               <path
                 id="individual-top-right-home"
                 class="${styleLine(individualObj.state || 0, config)}"
-                d="M${hasBottomRow ? 45 : 47},0 v15 c0,${hasBottomRow
-                  ? "30 -10,30 -30,30"
-                  : "35 -10,35 -30,35"} h-20"
+                d="M40 -10 v50"
                 vector-effect="non-scaling-stroke"
               />
               ${checkShouldShowDots(config) &&
               individualObj.state &&
               individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
-                ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
+                ? svg`<circle r="1.75" class="individual-top" vector-effect="non-scaling-stroke">
                       <animateMotion
                         dur="${computeIndividualFlowRate(
                           individualObj?.field?.calculate_flow_rate,
@@ -126,8 +128,44 @@ export const individualRightTopElement = (
                     </circle>`
                 : nothing}
             </svg>
-          </div>
-        `
+          `
+        : html`
+            <div class="right-individual-flow-container">
+              <svg
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice"
+                class="right-individual-flow"
+              >
+                <path
+                  id="individual-top-right-home"
+                  class="${styleLine(individualObj.state || 0, config)}"
+                  d="M${hasBottomRow ? 45 : 47},0 v15 c0,${hasBottomRow
+                    ? "30 -10,30 -30,30"
+                    : "35 -10,35 -30,35"} h-20"
+                  vector-effect="non-scaling-stroke"
+                />
+                ${checkShouldShowDots(config) &&
+                individualObj.state &&
+                individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
+                  ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
+                        <animateMotion
+                          dur="${computeIndividualFlowRate(
+                            individualObj?.field?.calculate_flow_rate,
+                            duration
+                          )}s"
+                          repeatCount="indefinite"
+                          calcMode="paced"
+                          keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
+                          keyTimes="0;1"
+                        >
+                          <mpath xlink:href="#individual-top-right-home" />
+                        </animateMotion>
+                      </circle>`
+                  : nothing}
+              </svg>
+            </div>
+          `
       : nothing}
   </div>`;
 };
