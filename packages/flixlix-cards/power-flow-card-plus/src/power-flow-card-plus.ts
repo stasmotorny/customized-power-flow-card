@@ -475,6 +475,7 @@ export class PowerFlowCardPlus extends LitElement {
                       templatesObj,
                       battery,
                       individualObjs,
+                      customTopologyHas,
                     })
                   : nothing}
               </div>`
@@ -525,6 +526,7 @@ export class PowerFlowCardPlus extends LitElement {
                       individualObj: individualFieldRightBottom,
                       newDur,
                       templatesObj,
+                      customTopologyHas,
                     })
                   : nothing}
               </div>`

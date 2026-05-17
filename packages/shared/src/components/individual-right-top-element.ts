@@ -11,6 +11,11 @@ import { checkHasBottomIndividual } from "@flixlix-cards/shared/utils/compute-in
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./flows/custom-topology-geometry";
 import { spacer } from "./spacer";
 import { individualSecondarySpan } from "./spans/individual-secondary-span";
 
@@ -21,12 +26,21 @@ interface TopIndividual {
   displayState: string;
   battery: any;
   individualObjs: IndividualObject[];
+  customTopologyHas?: boolean;
 }
 
 export const individualRightTopElement = (
   main: CardMainContext,
   config: FlowCardPlusConfig,
-  { individualObj, templatesObj, displayState, newDur, battery, individualObjs }: TopIndividual
+  {
+    individualObj,
+    templatesObj,
+    displayState,
+    newDur,
+    battery,
+    individualObjs,
+    customTopologyHas,
+  }: TopIndividual
 ) => {
   if (!individualObj) return spacer;
   const disableEntityClick = config.clickable_entities === false;
@@ -91,43 +105,79 @@ export const individualRightTopElement = (
         : nothing}
     </div>
     ${showLine(config, individualObj.state || 0) && !config.entities.home?.hide
-      ? html`
-          <div class="right-individual-flow-container">
-            <svg
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="xMidYMid slice"
-              class="right-individual-flow"
-            >
-              <path
-                id="individual-top-right-home"
-                class="${styleLine(individualObj.state || 0, config)}"
-                d="M${hasBottomRow ? 45 : 47},0 v15 c0,${hasBottomRow
-                  ? "30 -10,30 -30,30"
-                  : "35 -10,35 -30,35"} h-20"
-                vector-effect="non-scaling-stroke"
-              />
-              ${checkShouldShowDots(config) &&
-              individualObj.state &&
-              individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
-                ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
-                      <animateMotion
-                        dur="${computeIndividualFlowRate(
-                          individualObj?.field?.calculate_flow_rate,
-                          duration
-                        )}s"
-                        repeatCount="indefinite"
-                        calcMode="paced"
-                        keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
-                        keyTimes="0;1"
-                      >
-                        <mpath xlink:href="#individual-top-right-home" />
-                      </animateMotion>
-                    </circle>`
-                : nothing}
-            </svg>
-          </div>
-        `
+      ? customTopologyHas
+        ? html`
+            <div class="lines custom-topology-lines individual-right-top-flow">
+              <svg
+                viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="none"
+                id="individual-right-top-home-flow"
+              >
+                <path
+                  id="individual-top-right-home"
+                  class="${styleLine(individualObj.state || 0, config)}"
+                  d=${`M${CUSTOM_TOPOLOGY_X.home},${CUSTOM_TOPOLOGY_Y.middle} V${CUSTOM_TOPOLOGY_Y.solar}`}
+                  vector-effect="non-scaling-stroke"
+                />
+                ${checkShouldShowDots(config) &&
+                individualObj.state &&
+                individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
+                  ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
+                        <animateMotion
+                          dur="${computeIndividualFlowRate(
+                            individualObj?.field?.calculate_flow_rate,
+                            duration
+                          )}s"
+                          repeatCount="indefinite"
+                          calcMode="paced"
+                          keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
+                          keyTimes="0;1"
+                        >
+                          <mpath xlink:href="#individual-top-right-home" />
+                        </animateMotion>
+                      </circle>`
+                  : nothing}
+              </svg>
+            </div>
+          `
+        : html`
+            <div class="right-individual-flow-container">
+              <svg
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice"
+                class="right-individual-flow"
+              >
+                <path
+                  id="individual-top-right-home"
+                  class="${styleLine(individualObj.state || 0, config)}"
+                  d="M${hasBottomRow ? 45 : 47},0 v15 c0,${hasBottomRow
+                    ? "30 -10,30 -30,30"
+                    : "35 -10,35 -30,35"} h-20"
+                  vector-effect="non-scaling-stroke"
+                />
+                ${checkShouldShowDots(config) &&
+                individualObj.state &&
+                individualObj.state >= (individualObj.displayZeroTolerance ?? 0)
+                  ? svg`<circle r="1" class="individual-top" vector-effect="non-scaling-stroke">
+                        <animateMotion
+                          dur="${computeIndividualFlowRate(
+                            individualObj?.field?.calculate_flow_rate,
+                            duration
+                          )}s"
+                          repeatCount="indefinite"
+                          calcMode="paced"
+                          keyPoints="${individualObj.invertAnimation ? "0;1" : "1;0"}"
+                          keyTimes="0;1"
+                        >
+                          <mpath xlink:href="#individual-top-right-home" />
+                        </animateMotion>
+                      </circle>`
+                  : nothing}
+              </svg>
+            </div>
+          `
       : nothing}
   </div>`;
 };
