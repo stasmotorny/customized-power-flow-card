@@ -3,6 +3,11 @@ import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-sh
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 type FlowBatteryToInverterFlows = Pick<Flows, "battery" | "newDur">;
@@ -35,7 +40,7 @@ export const flowBatteryToInverter = (
   return html`
     <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 320 300"
+        viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         id="battery-inverter-flow"
@@ -43,7 +48,7 @@ export const flowBatteryToInverter = (
         <path
           id="battery-inverter"
           class="battery-home ${styleLine(battery.state.toHome || 0, config)}"
-          d="M200,280 V170"
+          d=${`M${CUSTOM_TOPOLOGY_X.inverter},${CUSTOM_TOPOLOGY_Y.battery} V${CUSTOM_TOPOLOGY_Y.middle}`}
           vector-effect="non-scaling-stroke"
         ></path>
 

@@ -3,6 +3,11 @@ import { checkShouldShowDots } from "@flixlix-cards/shared/utils/check-should-sh
 import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 type FlowGridViaBreakerInverterFlows = Pick<Flows, "grid" | "newDur">;
@@ -38,7 +43,7 @@ export const flowGridViaBreakerInverter = (
   return html`
     <div class="lines custom-topology-lines">
       <svg
-        viewBox="0 0 320 300"
+        viewBox=${CUSTOM_TOPOLOGY_VIEW_BOX}
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="none"
         id="grid-via-breaker-inverter-flow"
@@ -48,7 +53,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="grid-breaker"
           class="grid ${styleLine(value, config)}"
-          d="M40,170 H120"
+          d=${`M${CUSTOM_TOPOLOGY_X.grid},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.breaker}`}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "grid-breaker")}
@@ -57,7 +62,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="breaker-inverter"
           class="grid ${styleLine(value, config)}"
-          d="M120,170 H200"
+          d=${`M${CUSTOM_TOPOLOGY_X.breaker},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.inverter}`}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "breaker-inverter")}
@@ -66,7 +71,7 @@ export const flowGridViaBreakerInverter = (
         <path
           id="inverter-home"
           class="grid ${styleLine(value, config)}"
-          d="M200,170 H280"
+          d=${`M${CUSTOM_TOPOLOGY_X.inverter},${CUSTOM_TOPOLOGY_Y.middle} H${CUSTOM_TOPOLOGY_X.home}`}
           vector-effect="non-scaling-stroke"
         ></path>
         ${flowDot(config, grid, newDur, "inverter-home")}

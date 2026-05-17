@@ -166,7 +166,7 @@ export const styles = css`
     top: 0;
     bottom: auto;
     left: 0;
-    width: calc(var(--size-circle-entity) * 4);
+    width: 100%;
     height: 300px;
     display: block;
     margin-left: 0 !important;
@@ -213,7 +213,9 @@ export const styles = css`
   }
   .row.custom-topology-layout {
     display: grid;
-    grid-template-columns: repeat(4, var(--size-circle-entity));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-content: stretch;
+    justify-items: center;
   }
   .circle-container {
     display: flex;

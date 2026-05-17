@@ -8,6 +8,11 @@ import { showLine } from "@flixlix-cards/shared/utils/show-line";
 import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import {
+  CUSTOM_TOPOLOGY_VIEW_BOX,
+  CUSTOM_TOPOLOGY_X,
+  CUSTOM_TOPOLOGY_Y,
+} from "./custom-topology-geometry";
 import { type Flows } from "./index";
 
 const solarToBatteryDot = (
@@ -33,7 +38,9 @@ export const flowSolarToBattery = (
   const shouldShow = battery.has && solar.has && showLine(config, solar.state.toBattery || 0);
   if (!shouldShow) return nothing;
 
-  const path = customTopologyHas ? "M200,60 V280" : "M50,0 V100";
+  const path = customTopologyHas
+    ? `M${CUSTOM_TOPOLOGY_X.inverter},${CUSTOM_TOPOLOGY_Y.solar} V${CUSTOM_TOPOLOGY_Y.battery}`
+    : "M50,0 V100";
 
   return html`<div
     class="lines ${classMap({
@@ -44,7 +51,7 @@ export const flowSolarToBattery = (
     })}"
   >
     <svg
-      viewBox=${customTopologyHas ? "0 0 320 300" : "0 0 100 100"}
+      viewBox=${customTopologyHas ? CUSTOM_TOPOLOGY_VIEW_BOX : "0 0 100 100"}
       xmlns="http://www.w3.org/2000/svg"
       preserveAspectRatio=${customTopologyHas ? "none" : "xMidYMid slice"}
       id="solar-battery-flow"
