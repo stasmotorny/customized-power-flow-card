@@ -17,17 +17,18 @@ export interface Flows {
   individual: IndividualObject[];
   solar: any;
   directLoads?: any;
+  customTopologyHas?: boolean;
   newDur: NewDur;
 }
 
 export const flowElement = (
   config: FlowCardPlusConfig,
-  { battery, grid, individual, solar, directLoads, newDur }: Flows
+  { battery, grid, individual, solar, directLoads, customTopologyHas, newDur }: Flows
 ) => {
   return html`
-  ${flowSolarToHome(config, { battery, grid, individual, solar, newDur })}
-  ${flowSolarToGrid(config, { battery, grid, individual, solar, newDur })}
-  ${flowSolarToBattery(config, { battery, individual, solar, newDur })}
+  ${flowSolarToHome(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
+  ${flowSolarToGrid(config, { battery, grid, individual, solar, customTopologyHas, newDur })}
+  ${flowSolarToBattery(config, { battery, individual, solar, customTopologyHas, newDur })}
 <!--  ${flowGridToHome(config, { battery, grid, individual, solar, newDur })}-->
   ${flowGridViaBreakerInverter(config, { grid, newDur })}
 <!--  ${flowBatteryToHome(config, { battery, grid, individual, newDur })}-->

@@ -117,6 +117,7 @@ export class PowerFlowCardPlus extends LitElement {
   @query("#solar-battery-flow") solarToBatteryFlow?: SVGSVGElement;
   @query("#solar-grid-flow") solarToGridFlow?: SVGSVGElement;
   @query("#solar-home-flow") solarToHomeFlow?: SVGSVGElement;
+  @query("#breaker-direct-loads-flow") directLoadsFlow?: SVGSVGElement;
   private _renderData?:
     | {
         entities: PowerFlowCardPlusConfig["entities"];
@@ -427,23 +428,42 @@ export class PowerFlowCardPlus extends LitElement {
                   nonFossil,
                   templatesObj,
                 })}
-                ${solar.has
-                  ? solarElement(this, this._config, {
-                      entities,
-                      solar,
-                      templatesObj,
-                    })
-                  : spacer}
-                ${directLoads.has
-                  ? directLoadsElement(this, this._config, directLoads)
-                  : individualFieldLeftTop
-                    ? individualLeftTopElement(this, this._config, {
-                        individualObj: individualFieldLeftTop,
-                        displayState: getIndividualDisplayState(individualFieldLeftTop),
-                        newDur,
+                ${customTopologyHas
+                  ? directLoads.has
+                    ? directLoadsElement(this, this._config, directLoads)
+                    : individualFieldLeftTop
+                      ? individualLeftTopElement(this, this._config, {
+                          individualObj: individualFieldLeftTop,
+                          displayState: getIndividualDisplayState(individualFieldLeftTop),
+                          newDur,
+                          templatesObj,
+                        })
+                      : spacer
+                  : solar.has
+                    ? solarElement(this, this._config, {
+                        entities,
+                        solar,
                         templatesObj,
                       })
                     : spacer}
+                ${customTopologyHas
+                  ? solar.has
+                    ? solarElement(this, this._config, {
+                        entities,
+                        solar,
+                        templatesObj,
+                      })
+                    : spacer
+                  : directLoads.has
+                    ? directLoadsElement(this, this._config, directLoads)
+                    : individualFieldLeftTop
+                      ? individualLeftTopElement(this, this._config, {
+                          individualObj: individualFieldLeftTop,
+                          displayState: getIndividualDisplayState(individualFieldLeftTop),
+                          newDur,
+                          templatesObj,
+                        })
+                      : spacer}
                 ${checkHasRightIndividual(individualObjs)
                   ? individualRightTopElement(this, this._config, {
                       displayState: getIndividualDisplayState(individualFieldRightTop),
@@ -514,6 +534,7 @@ export class PowerFlowCardPlus extends LitElement {
             newDur,
             solar,
             directLoads,
+            customTopologyHas,
           })}
         </div>
         ${dashboardLinkElement(this._config, this.hass)}
@@ -983,7 +1004,8 @@ export class PowerFlowCardPlus extends LitElement {
         | "gridToHome"
         | "solarToBattery"
         | "solarToGrid"
-        | "solarToHome";
+        | "solarToHome"
+        | "directLoads";
       const flowNames: AnimatedFlowName[] = [
         "batteryGrid",
         "batteryToHome",
@@ -991,21 +1013,25 @@ export class PowerFlowCardPlus extends LitElement {
         "solarToBattery",
         "solarToGrid",
         "solarToHome",
+        "directLoads",
       ];
       flowNames.forEach((flowName) => {
+        const duration = newDur[flowName];
+        if (duration === undefined) return;
+
         const flowSVGElement = this[`${flowName}Flow`] as SVGSVGElement;
         if (
           flowSVGElement &&
           this.previousDur[flowName] &&
-          this.previousDur[flowName] !== newDur[flowName]
+          this.previousDur[flowName] !== duration
         ) {
           flowSVGElement.pauseAnimations();
           flowSVGElement.setCurrentTime(
-            flowSVGElement.getCurrentTime() * (newDur[flowName] / this.previousDur[flowName])
+            flowSVGElement.getCurrentTime() * (duration / this.previousDur[flowName])
           );
           flowSVGElement.unpauseAnimations();
         }
-        this.previousDur[flowName] = newDur[flowName];
+        this.previousDur[flowName] = duration;
       });
     } else {
       this.previousDur = {};
