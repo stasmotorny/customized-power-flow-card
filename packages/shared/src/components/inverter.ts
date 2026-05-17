@@ -5,4 +5,4 @@ export const inverterElement = (
   main: CardMainContext,
   config: FlowCardPlusConfig,
   inverter: CustomPowerNode
-) => customPowerNodeElement(main, config, inverter, "battery");
+) => customPowerNodeElement(main, config, inverter, "battery inverter");

@@ -147,5 +147,8 @@ describe("flowElement", () => {
     expect(cssText).toContain("grid-template-columns: repeat(4, minmax(0, 1fr))");
     expect(cssText).toContain("justify-content: stretch");
     expect(cssText).toContain("justify-items: center");
+    expect(cssText).toContain(".circle-container.battery.inverter");
+    expect(cssText).toContain("height: auto");
+    expect(cssText).toContain("justify-content: flex-start");
   });
 });

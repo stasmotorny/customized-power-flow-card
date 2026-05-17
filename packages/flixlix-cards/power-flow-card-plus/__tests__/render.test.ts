@@ -112,7 +112,7 @@ describe("render", () => {
     expect(markup).not.toContain('class="row standard-layout"');
     expect(middleRow.match(/class="circle-container grid"/g) ?? []).toHaveLength(2);
     expect(middleRow).toContain('id="grid-icon"');
-    expect(middleRow).toContain('class="circle-container battery"');
+    expect(middleRow).toContain('class="circle-container battery inverter"');
     expect(middleRow).toContain('id="home-circle"');
     expect(middleRow.match(/class="spacer"/g) ?? []).toHaveLength(0);
   });

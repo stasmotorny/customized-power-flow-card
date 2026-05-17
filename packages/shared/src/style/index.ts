@@ -240,6 +240,10 @@ export const styles = css`
     height: 110px;
     justify-content: flex-end;
   }
+  .circle-container.battery.inverter {
+    height: auto;
+    justify-content: flex-start;
+  }
   .spacer {
     width: var(--size-circle-entity);
   }
