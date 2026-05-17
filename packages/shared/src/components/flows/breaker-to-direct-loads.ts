@@ -5,22 +5,18 @@ import { styleLine } from "@flixlix-cards/shared/utils/style-line";
 import { html, nothing, svg } from "lit";
 import { type Flows } from "./index";
 
-type FlowBreakerToDirectLoadsFlows = Pick<Flows, "grid" | "newDur">;
+type FlowBreakerToDirectLoadsFlows = Pick<Flows, "directLoads" | "newDur">;
 
 const breakerToDirectLoadsDot = (
   config: FlowCardPlusConfig,
-  grid: FlowBreakerToDirectLoadsFlows["grid"],
+  directLoads: FlowBreakerToDirectLoadsFlows["directLoads"],
   newDur: FlowBreakerToDirectLoadsFlows["newDur"]
 ) => {
-  if (!checkShouldShowDots(config) || !grid.state.toHome) return nothing;
+  if (!checkShouldShowDots(config) || !directLoads.state) return nothing;
 
   return svg`
     <circle r="1" class="grid" vector-effect="non-scaling-stroke">
-      <animateMotion
-        dur="${newDur.gridToHome}s"
-        repeatCount="indefinite"
-        calcMode="paced"
-      >
+      <animateMotion dur="${newDur.directLoads}s" repeatCount="indefinite" calcMode="paced">
         <mpath xlink:href="#breaker-direct-loads" />
       </animateMotion>
     </circle>
@@ -29,15 +25,13 @@ const breakerToDirectLoadsDot = (
 
 export const flowBreakerToDirectLoads = (
   config: FlowCardPlusConfig,
-  { grid, newDur }: FlowBreakerToDirectLoadsFlows
+  { directLoads, newDur }: FlowBreakerToDirectLoadsFlows
 ) => {
-  const shouldShow =
-    grid.has &&
-    showLine(config, grid.state.fromGrid);
+  const shouldShow = directLoads?.has && showLine(config, directLoads.state);
 
   if (!shouldShow) return nothing;
 
-  const value = grid.state.toHome || 0;
+  const value = directLoads.state || 0;
 
   return html`
     <div class="lines high">
@@ -50,11 +44,11 @@ export const flowBreakerToDirectLoads = (
         <path
           id="breaker-direct-loads"
           class="grid ${styleLine(value, config)}"
-          d="M33.33,50 V0"
+          d="M33.33,50 C33.33,25 66.67,25 66.67,0"
           vector-effect="non-scaling-stroke"
         ></path>
 
-        ${breakerToDirectLoadsDot(config, grid, newDur)}
+        ${breakerToDirectLoadsDot(config, directLoads, newDur)}
       </svg>
     </div>
   `;

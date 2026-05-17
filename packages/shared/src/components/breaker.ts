@@ -1,13 +1,8 @@
-import { html } from "lit";
+import { type CardMainContext, type FlowCardPlusConfig } from "@flixlix-cards/shared/types";
+import { customPowerNodeElement, type CustomPowerNode } from "./custom-power-node";
 
-export const breakerElement = () => {
-  return html`
-    <div class="circle-container grid">
-      <div class="circle">
-        <ha-icon id="grid-icon" .icon=${"mdi:electric-switch"}></ha-icon>
-        <span>TEST</span>
-      </div>
-      <span class="label">Вхідний автомат</span>
-    </div>
-  `;
-};
+export const breakerElement = (
+  main: CardMainContext,
+  config: FlowCardPlusConfig,
+  breaker: CustomPowerNode
+) => customPowerNodeElement(main, config, breaker, "grid", "grid-icon");
